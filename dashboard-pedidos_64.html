@@ -1,0 +1,1509 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='54' font-size='56'%3E%F0%9F%93%A6%3C/text%3E%3C/svg%3E">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📦</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0eeeb; --surface: #ffffff; --surface2: #f5f4f1; --border: #e2dfd9;
+    --accent: #2563eb; --accent2: #d97706; --danger: #dc2626; --success: #16a34a;
+    --purple: #7c3aed; --text: #1a1a1a; --muted: #6b7280;
+    --green: #16a34a; --yellow: #d97706; --red: #dc2626;
+    --mono: 'DM Mono', monospace; --display: 'Syne', sans-serif; --body: 'DM Sans', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--body); min-height: 100vh; }
+
+  /* Setup */
+  #setup { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+  .setup-card { background: #ffffff; border: 1px solid var(--border); border-radius: 16px; padding: 3rem; max-width: 480px; width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+  .setup-card h1 { font-family: var(--display); font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .setup-card > p { color: var(--muted); font-size: 0.88rem; margin-bottom: 2rem; line-height: 1.6; }
+  label { display: block; font-size: 0.72rem; font-family: var(--mono); color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  input[type="text"], input[type="password"] { width: 100%; background: #ffffff; border: 1px solid var(--border); border-radius: 8px; padding: 0.75rem 1rem; color: var(--text); font-family: var(--mono); font-size: 0.83rem; margin-bottom: 1.25rem; outline: none; transition: border-color 0.2s; }
+  input:focus { border-color: var(--accent); }
+  .hint { font-size: 0.72rem; color: var(--muted); margin-top: -0.9rem; margin-bottom: 1.25rem; line-height: 1.5; }
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; background: var(--accent); color: #fff; border: none; border-radius: 8px; padding: 0.75rem 1.5rem; font-family: var(--display); font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: opacity 0.2s; width: 100%; }
+  .btn:hover { opacity: 0.88; }
+  .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .btn-sm { width: auto; padding: 0.4rem 0.9rem; font-size: 0.78rem; background: #ffffff; border: 1px solid var(--border); color: var(--text); }
+  .btn-sm:hover { background: var(--border); opacity: 1; }
+  .error-msg { background: #fee2e2; border: 1px solid #fecaca; border-radius: 8px; padding: 0.75rem 1rem; color: #b91c1c; font-size: 0.83rem; margin-top: 1rem; display: none; }
+
+  /* Dashboard */
+  #dashboard { display: none; }
+  header { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 1px solid var(--border); background: #ffffff; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+  .header-left h1 { font-family: var(--display); font-size: 1.1rem; font-weight: 800; }
+  .header-left span { font-size: 0.72rem; color: var(--muted); font-family: var(--mono); }
+  .header-right { display: flex; align-items: center; gap: 0.75rem; }
+  .last-update { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+  .dot-live { width: 6px; height: 6px; background: #16a34a; border-radius: 50%; display: inline-block; margin-right: 4px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  main { padding: 2rem; max-width: 1400px; margin: 0 auto; }
+
+  /* Alertas */
+  .alerts-container { margin-bottom: 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
+  .alert-card { background: rgba(79,142,247,0.08); border: 1px solid rgba(79,142,247,0.3); border-radius: 10px; padding: 1rem 1.25rem; display: flex; align-items: flex-start; gap: 1rem; animation: slideIn 0.4s ease; }
+  @keyframes slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
+  .alert-icon { font-size: 1.2rem; flex-shrink: 0; }
+  .alert-body { flex: 1; }
+  .alert-title { font-family: var(--display); font-size: 0.88rem; font-weight: 700; color: #7ab0ff; margin-bottom: 0.2rem; }
+  .alert-detail { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+  .alert-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0 0.25rem; }
+
+  /* KPIs */
+  .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 0.5rem; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem 1.5rem; position: relative; overflow: hidden; cursor: pointer; transition: border-color 0.2s, transform 0.15s; }
+  .kpi:hover { border-color: var(--kpi-color, var(--accent)); transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .kpi.active { border-color: var(--kpi-color, var(--accent)); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+  .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--kpi-color, var(--accent)); }
+  .kpi-label { font-family: var(--mono); font-size: 0.68rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.5rem; }
+  .kpi-value { font-family: var(--display); font-size: 2rem; font-weight: 800; line-height: 1; color: var(--kpi-color, var(--text)); }
+  .kpi-sub { font-size: 0.73rem; color: var(--muted); margin-top: 0.3rem; }
+  .kpi-hint { font-size: 0.65rem; color: var(--muted); margin-top: 0.5rem; opacity: 0.6; }
+
+  /* Expand panel genérico */
+  .expand-panel {
+    background: #f8f7f5; border: 1px solid var(--border); border-top: none;
+    border-radius: 0 0 12px 12px; overflow: hidden;
+    max-height: 0; transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+    margin-bottom: 1.5rem;
+  }
+  .expand-panel.open { max-height: 400px; overflow-y: auto; }
+  .expand-panel-inner { padding: 0.75rem 1.25rem; }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+  @media(max-width:1000px){ .two-col { grid-template-columns: 1fr; } }
+
+  .panel { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-bottom: 1.5rem; }
+  .panel-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); }
+  .panel-title { font-family: var(--display); font-size: 0.88rem; font-weight: 700; }
+  .badge { font-family: var(--mono); font-size: 0.68rem; padding: 0.2rem 0.6rem; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); }
+  .badge.danger { background: #fee2e2; border-color: #fecaca; color: var(--danger); }
+  .badge.success { background: #dcfce7; border-color: #bbf7d0; color: var(--success); }
+
+  /* Estado bars */
+  .estado-list { padding: 1rem 1.5rem; }
+  .estado-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.85rem; }
+  .estado-name { font-size: 0.8rem; color: var(--muted); width: 180px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .estado-bar-wrap { flex: 1; height: 5px; background: var(--bg); border-radius: 3px; overflow: hidden; }
+  .estado-bar { height: 100%; border-radius: 3px; transition: width 0.8s cubic-bezier(0.4,0,0.2,1); }
+  .estado-count { font-family: var(--mono); font-size: 0.75rem; color: var(--text); width: 20px; text-align: right; }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  thead tr { border-bottom: 1px solid var(--border); background: #f5f4f1; }
+  th { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; padding: 0.75rem 1rem; text-align: left; font-weight: 400; white-space: nowrap; }
+  td { padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tr.clickable { cursor: pointer; }
+  tr.clickable:hover td { background: var(--surface2); }
+  tr.active-row td { background: #eff6ff; }
+  td.group-cell { border-right: 1px solid var(--border); font-weight: 500; vertical-align: top; padding-top: 0.9rem; }
+  tr.group-first td { border-top: 2px solid var(--border); }
+  tr.group-first:first-child td { border-top: none; }
+
+  /* Detail row */
+  .detail-row td { padding: 0; border-bottom: 2px solid var(--border); }
+  .detail-content {
+    background: #f8f7f5; padding: 1.25rem 1.5rem;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem;
+  }
+  .detail-field { }
+  .detail-field-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 0.3rem; }
+  .detail-field-value { font-size: 0.85rem; font-weight: 500; }
+  .detail-skus { grid-column: 1 / -1; }
+  .detail-sku-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 0.5rem; }
+
+  .td-name { font-weight: 500; min-width: 160px; }
+  .td-name small { display: block; color: var(--muted); font-size: 0.72rem; font-weight: 400; margin-top: 2px; }
+  .mono-val { font-family: var(--mono); font-size: 0.78rem; }
+
+  .sku-tag { display: inline-flex; align-items: center; gap: 3px; border-radius: 4px; padding: 2px 8px; font-size: 0.7rem; font-family: var(--mono); border: 1px solid; white-space: nowrap; }
+  .sku-sin-pedir { background: #fee2e2; border-color: #fecaca; color: #b91c1c; }
+  .sku-pedido    { background: #fef3c7; border-color: #fde68a; color: #b45309; }
+  .sku-completado{ background: #dcfce7; border-color: #bbf7d0; color: #15803d; }
+
+  .status-pill { font-family: var(--mono); font-size: 0.65rem; padding: 0.2rem 0.65rem; border-radius: 20px; white-space: nowrap; display: inline-block; }
+  .pill-confirmado { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+  .pill-proceso    { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .pill-completado { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+  .pill-despachado { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+
+  .dias-chip { font-family: var(--mono); font-size: 0.68rem; font-weight: 600; padding: 2px 6px; border-radius: 4px; white-space: nowrap; display: inline-flex; align-items: center; gap: 2px; }
+  .dias-green  { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+  .dias-yellow { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+  .dias-red    { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+  .dias-none   { font-family: var(--mono); font-size: 0.75rem; color: var(--muted); }
+
+  /* Ranking */
+  .ranking-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1.5rem; border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s; }
+  .ranking-row:last-child { border-bottom: none; }
+  .ranking-row:hover { background: #f5f4f1; }
+  .ranking-row.active { background: #eff6ff; border-left: 2px solid var(--accent); }
+  .ranking-num { font-family: var(--display); font-size: 1rem; font-weight: 800; color: var(--muted); width: 28px; flex-shrink: 0; text-align: center; }
+  .ranking-num.r1 { color: var(--red); }
+  .ranking-num.r2 { color: #f7a04f; }
+  .ranking-num.r3 { color: var(--yellow); }
+  .ranking-info { flex: 1; min-width: 0; }
+  .ranking-name { font-size: 0.85rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ranking-meta { font-size: 0.72rem; color: var(--muted); margin-top: 2px; }
+  .ranking-expand { background: #f8f7f5; border-top: 1px solid var(--border); padding: 1rem 1.5rem 1rem 4rem; display: none; }
+  .ranking-expand.open { display: block; }
+
+  /* SKU grupo */
+  .sku-group { border-bottom: 1px solid var(--border); }
+  .sku-group:last-child { border-bottom: none; }
+  .sku-group-header { display: flex; align-items: center; gap: 1rem; padding: 0.85rem 1.5rem; cursor: pointer; transition: background 0.15s; user-select: none; }
+  .sku-group-header:hover { background: #f5f4f1; }
+  .sku-group.open .sku-group-header { background: #fff5f5; }
+  .sku-group-code { font-family: var(--mono); font-size: 0.9rem; font-weight: 600; color: #b91c1c; flex: 1; }
+  .sku-group-total { font-family: var(--mono); font-size: 0.85rem; font-weight: 700; color: #b91c1c; }
+  .sku-group-arrow { color: var(--muted); font-size: 0.75rem; transition: transform 0.2s; margin-left: 0.5rem; }
+  .sku-group.open .sku-group-arrow { transform: rotate(90deg); }
+  .sku-group-rows { display: none; }
+  .sku-group.open .sku-group-rows { display: block; }
+
+  .sku-sub-row { display: grid; grid-template-columns: 90px 90px 1fr 60px; gap: 0.75rem; align-items: center; padding: 0.6rem 1.5rem 0.6rem 3rem; border-top: 1px solid var(--border); background: #fafaf9; cursor: pointer; transition: background 0.15s; }
+  .sku-sub-row:hover { background: #f0eeeb; }
+  .sku-sub-row.active { background: rgba(247,97,79,0.06); }
+  .sku-sub-label { font-family: var(--mono); font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; display: block; margin-bottom: 2px; }
+  .sku-pedidos-expand { background: #ffffff; border-top: 1px solid var(--border); padding: 0.75rem 1.5rem 0.75rem 4rem; display: none; }
+  .sku-pedidos-expand.open { display: block; }
+  .sku-pedido-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.4rem 0; font-size: 0.82rem; }
+  .sku-pedido-item + .sku-pedido-item { border-top: 1px solid var(--border); }
+
+  /* Cliente cards */
+  .cliente-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 0.75rem; padding: 1.25rem 1.5rem; }
+  .cliente-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 0.85rem 1rem; cursor: pointer; transition: border-color 0.2s, transform 0.15s; }
+  .cliente-card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .cliente-card.active { border-color: var(--accent); background: rgba(79,142,247,0.08); border-bottom-left-radius: 0; border-bottom-right-radius: 0; }
+  .cc-name { font-size: 0.8rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.3rem; }
+  .cc-count { font-family: var(--display); font-size: 1.3rem; font-weight: 700; color: var(--accent); }
+  .cc-sub { font-size: 0.7rem; color: var(--muted); margin-top: 0.15rem; }
+  .cliente-expand { background: var(--surface2); border: 1px solid var(--border); border-top: none; border-radius: 0 0 8px 8px; padding: 0; max-height: 0; overflow: hidden; transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1); margin-bottom: 0; }
+  .cliente-expand.open { max-height: 400px; overflow-y: auto; }
+
+  .custom-tag { font-size: 0.68rem; font-family: var(--mono); padding: 0.15rem 0.5rem; border-radius: 4px; background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+
+  .filter-bar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: center; }
+  .filter-bar input { margin: 0; max-width: 280px; padding: 0.55rem 0.9rem; font-size: 0.8rem; }
+  .filter-label { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+
+  .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4rem; color: var(--muted); gap: 1rem; }
+  .spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .empty { padding: 2rem; text-align: center; color: var(--muted); font-size: 0.83rem; }
+  .debug-panel { background: #f5f4f1; border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.5rem; margin-bottom: 1.5rem; font-family: var(--mono); font-size: 0.72rem; color: var(--muted); line-height: 1.7; display: none; max-height: 260px; overflow-y: auto; }
+
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+
+  .deposito-search-bar { display: flex; align-items: center; gap: 0.75rem; padding: 1rem 0 1.25rem; }
+  .deposito-search-input { flex: 1; max-width: 320px; background: #ffffff; border: 1.5px solid var(--border); border-radius: 8px; padding: 0.6rem 1rem; font-family: var(--mono); font-size: 0.85rem; color: var(--text); outline: none; transition: border-color 0.2s; }
+  .deposito-search-input:focus { border-color: #0369a1; }
+  .deposito-search-clear { background: none; border: 1px solid var(--border); border-radius: 8px; padding: 0.55rem 0.9rem; font-size: 0.78rem; color: var(--muted); cursor: pointer; transition: background 0.15s; }
+  .deposito-search-clear:hover { background: #f5f4f1; }
+  .deposito-match-highlight { background: #fef9c3; border-radius: 2px; font-weight: 700; }
+
+  /* Tabs */
+  .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 1.5rem; }
+  .tab { padding: 0.65rem 1.5rem; font-family: var(--display); font-size: 0.85rem; font-weight: 700; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.15s; background: none; border-top: none; border-left: none; border-right: none; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* Vista depósito */
+  .deposito-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
+  .deposito-card { background: #ffffff; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; transition: box-shadow 0.15s; }
+  .deposito-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+  .deposito-card-header { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); background: #f8f7f5; display: flex; align-items: flex-start; gap: 0.75rem; }
+  .deposito-card-name { font-size: 0.88rem; font-weight: 600; flex: 1; min-width: 0; line-height: 1.3; }
+  .deposito-card-meta { font-size: 0.7rem; color: var(--muted); margin-top: 2px; }
+  .deposito-card-body { padding: 0.85rem 1rem; }
+  .deposito-sku-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.4rem 0; border-bottom: 1px solid #f5f4f1; }
+  .deposito-sku-row:last-child { border-bottom: none; }
+  .deposito-sku-code { font-family: var(--mono); font-size: 0.78rem; font-weight: 600; color: var(--text); min-width: 90px; }
+  .deposito-sku-info { flex: 1; min-width: 0; }
+  .deposito-sku-desc { font-size: 0.72rem; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .deposito-sku-detail { display: flex; align-items: center; gap: 0.4rem; margin-top: 1px; }
+  .deposito-qty { font-family: var(--mono); font-size: 0.72rem; font-weight: 700; background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; border-radius: 4px; padding: 1px 6px; }
+  .deposito-color { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); }
+  .deposito-talle { font-family: var(--mono); font-size: 0.7rem; font-weight: 600; background: #f5f4f1; border-radius: 4px; padding: 1px 5px; color: var(--text); }
+  .deposito-empty { padding: 3rem; text-align: center; color: var(--muted); font-size: 0.88rem; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: #d1cdc7; border-radius: 3px; }
+  .trello-link { font-family: var(--mono); font-size: 0.7rem; color: var(--accent); text-decoration: none; }
+  .trello-link:hover { text-decoration: underline; }
+
+  .click-hint { font-size: 0.65rem; color: var(--muted); margin-top: 0.4rem; display: flex; align-items: center; gap: 3px; }
+</style>
+</head>
+<body>
+
+<div id="setup">
+  <div class="setup-card">
+    <h1>Dashboard Pedidos</h1>
+    <p>Conectá tu tablero con tus credenciales de Trello. Se guardan solo en tu navegador.</p>
+    <label>Trello API Key</label>
+    <input type="text" id="apiKey" placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" autocomplete="off" />
+    <label>Trello Token</label>
+    <input type="password" id="token" placeholder="token de 64 caracteres..." autocomplete="off" />
+    <label>Board ID</label>
+    <input type="text" id="boardId" placeholder="ej: 3sWRgjJ3" autocomplete="off" />
+    <p class="hint">URL del tablero: trello.com/b/<strong style="color:var(--accent)">BOARD_ID</strong>/nombre</p>
+    <button class="btn" onclick="connect()">Conectar tablero →</button>
+    <div class="error-msg" id="errorMsg"></div>
+  </div>
+</div>
+
+<div id="dashboard">
+  <header>
+    <div class="header-left">
+      <h1>📦 Pedidos Córdoba</h1>
+      <span id="boardName"></span>
+    </div>
+    <div class="header-right">
+      <span class="last-update"><span class="dot-live"></span><span id="lastUpdate">—</span></span>
+      <button class="btn btn-sm" onclick="loadData()">↻ Actualizar</button>
+      <button class="btn btn-sm" onclick="toggleDebug()">🔍 Debug</button>
+      <button class="btn btn-sm" onclick="resetConfig()" style="color:var(--danger)">Desconectar</button>
+    </div>
+  </header>
+  <main>
+    <div class="debug-panel" id="debugPanel"></div>
+    <div id="alertsContainer" class="alerts-container"></div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(this.dataset.tab)" data-tab="general">📊 General</button>
+      <button class="tab" onclick="switchTab(this.dataset.tab)" data-tab="deposito">📦 Depósito</button>
+    </div>
+    <div id="tab-general" class="tab-content active">
+    <div id="mainContent">
+      <div class="loading"><div class="spinner"></div><span>Cargando datos...</span></div>
+    </div>
+    </div><!-- end tab-general -->
+
+    <div id="tab-deposito" class="tab-content">
+      <div class="deposito-search-bar">
+        <input type="text" id="deposito-search" class="deposito-search-input"
+          placeholder="🔍  Buscá un SKU... ej: U034-H2-48"
+          oninput="filterDeposito(this.value)" />
+        <button class="deposito-search-clear" onclick="clearDepositoSearch()" id="deposito-clear" style="display:none">✕ Limpiar</button>
+        <span id="deposito-match-info" style="font-family:var(--mono);font-size:0.75rem;color:var(--muted)"></span>
+      </div>
+      <div id="deposito-content">
+        <div class="deposito-empty">Cargando...</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+let API_KEY = '', TOKEN = '', BOARD_ID = '';
+let filterProveedor = '', filterArticulo = '';
+
+const CATALOG = {"I116":{"desc":"PANTALON CAZADOR CARGO II H. PAMPERO CHICO (36-54)","proveedores":["MACATA SA"]},"111122053":{"desc":"REMERA BASICA JERSEY 24/1 PEINADO LINCOLN","proveedores":["Pampenorte S.R.L."]},"U752":{"desc":"CHALECO SOFTSHELL PAMPERO IND.","proveedores":["RANQUEL DEL PLATA SA"]},"111138100":{"desc":"CHOMBA BASICA PIQUE PAMPERO","proveedores":["Pampenorte S.R.L."]},"111140100":{"desc":"REMERA BASICA JERSEY 24/1 PAMPERO","proveedores":["Pampenorte S.R.L."]},"121134003":{"desc":"BOTINETA PEHUAJO C/ CORDONES","proveedores":["RANQUEL DEL PLATA SA"]},"134171010":{"desc":"GUANTE CUTEX TOUCH ANTI CORTE PU","proveedores":["INDUSTRIAL ZONDA SA"]},"321173003":{"desc":"BOTIN TREKKING CASTOR","proveedores":["INTENSIVO SA"]},"411124020":{"desc":"CAMISA SAN LUIS C.SEMI AB.BOT M/L","proveedores":["AZUL PATAGONIA"]},"411138029":{"desc":"POLO RIO DE LA PLATA","proveedores":["C D Way S.A."]},"811122047":{"desc":"REMERA BASICA M/C ESC RED.","proveedores":["C D Way S.A."]},"I011":{"desc":"TRAJE DE LLUVIA PVC PAMPERO","proveedores":["SAFETY SOLUTION SA"]},"I036":{"desc":"PANTALON DE TRABAJO HOMBRE PAMPERO CH(36-60)","proveedores":["MACATA SA"]},"I075":{"desc":"GUANTE DESCARNE SOLDADOR","proveedores":["CANOR - NOGUERA CARLOS JAVIER"]},"I102":{"desc":"BOMBACHA LISA HOMBRE PAMPERO (38-54)","proveedores":["MACATA SA"]},"I257":{"desc":"PONCHO RESERO ROYAL PAMPERO PVC","proveedores":["SAFETY SOLUTION SA"]},"IC012":{"desc":"CAMISA DE TRABAJO H. M/L PAMPERO CH (36-48)","proveedores":["MACATA SA"]},"IC015":{"desc":"CAMISA DE TRAB H.M/L PAMPERO AZUL CH(38-48)","proveedores":["MACATA SA"]},"U013":{"desc":"ALPARGATA INYECTADA SIMIL YUTE PAMPERO","proveedores":["MP NEGOCIOS ARGENTINA SA"]},"U029":{"desc":"PANTALON CARGO BAGUALES PAMPERO","proveedores":["CITEX SRL"]},"U082":{"desc":"CINTO SAUCE COMB. 40 SOGA PAMPERO","proveedores":["Pionera S.A."]},"U12106004":{"desc":"PANTALON CAIRO PAMPERO","proveedores":["MACATA SA"]},"U178":{"desc":"PANTALON JUNIN CHUPIN","proveedores":["RIEMERSO SA"]},"U412":{"desc":"PANTALON CARGO DEL NORTE H.","proveedores":["CITEX SRL"]},"123410131":{"desc":"BOTIN PATRIO C/FLOR C/P PAMPERO","proveedores":["RANQUEL DEL PLATA SA"]},"13106003":{"desc":"ROMPEVIENTO PAMPERO","proveedores":["La Pettit S.A."]},"136121501":{"desc":"TRAJE DE LLUVIA STORM PAMPERO","proveedores":["SAFETY SOLUTION SA"]},"224122000":{"desc":"PANCHA RANCHO","proveedores":["CITEX SRL"]},"241122007":{"desc":"BOINA VASCA ALGODON 35CM","proveedores":["Corbellini Pablo Andres"]},"244122009":{"desc":"FAJA GUARDA PAMPA 9CM PAMPERO","proveedores":["Corbellini Pablo Andres"]},"245122001":{"desc":"RUANA PESADA C/GUARDA","proveedores":["Corbellini Pablo Andres"]},"3001":{"desc":"CHAPA Nº0 16X21","proveedores":["Recalde Gaston Alberto"]},"311106107":{"desc":"CAMISA PUAN M/CORTA 2 BOLSILLOS","proveedores":["Armesto Maria Eugenia"]},"311106108":{"desc":"CAMISA PUAN PAPPER M/L","proveedores":["Armesto Maria Eugenia"]},"312106024":{"desc":"PANTALON EPEUCEN SOFTSHELL SOLAR PRO H.","proveedores":["Armesto Maria Eugenia"]},"312157000":{"desc":"PANTALON HUEMUL","proveedores":["Lopez Omar Alexis"]},"313106019":{"desc":"CHALECO DORADO SOFSHELL","proveedores":["Lopez Omar Alexis"]},"313106202":{"desc":"CAMPERA PACU","proveedores":["Lopez Omar Alexis"]},"313211142":{"desc":"CAMPERA CURRUHUE H. SOFTSELL","proveedores":["Armesto Maria Eugenia"]},"342106000":{"desc":"CUELLO MULTIFUNCION","proveedores":["Lopez Omar Alexis"]},"411103006":{"desc":"CAMISA OXFORD HOMBRE BARRACAS","proveedores":["CITEX SRL"]},"411106108":{"desc":"CAMISA ACTIVIDAD","proveedores":["BREA MARIA PAULA"]},"411122019":{"desc":"CAMISA CEFERINO POPLIN C. ITAL","proveedores":["AZUL PATAGONIA"]},"411122024":{"desc":"SWEATER SAN CARLOS","proveedores":["FOOTWEAR S.R.L"]},"411122059":{"desc":"CAMPERA SAN CARLOS","proveedores":["FOOTWEAR S.R.L"]},"411122214":{"desc":"SWEATER PINO","proveedores":["J.S. Purpura S.R.L."]},"411122231":{"desc":"SWEATER MORRIS ESCOTE V","proveedores":["J.S. Purpura S.R.L."]},"411122240":{"desc":"CHALECO LENGA","proveedores":["J.S. Purpura S.R.L."]},"411122244":{"desc":"CAMISA MONTE","proveedores":["CITEX SRL"]},"411124001":{"desc":"CAMISA SOLER C/INGLES ML C/B POPLIN","proveedores":["AZUL PATAGONIA"]},"411138008":{"desc":"POLO BASICA PIQUE","proveedores":["C D Way S.A."]},"411139007":{"desc":"CAMPERA CORMORANES","proveedores":["C D Way S.A."]},"411140004":{"desc":"REMERA BASICA PREMIUM 30/1 PAMPERO","proveedores":["C D Way S.A."]},"411140205":{"desc":"REMERA MOLINOS","proveedores":["C D Way S.A."]},"411140216":{"desc":"REMERA COLOME","proveedores":["C D Way S.A."]},"411140218":{"desc":"POLO VOLCAN DOMUYO","proveedores":["C D Way S.A."]},"411514109":{"desc":"CAMISA FRENCH FANTASIA","proveedores":["CITEX SRL"]},"411520002":{"desc":"CAMPERA ITAMBAE","proveedores":["J.S. Purpura S.R.L."]},"411520003":{"desc":"SWEATER AYACUCHO","proveedores":["J.S. Purpura S.R.L."]},"411527012":{"desc":"CAMISA SOLER CUELLO INGLES OXFORD RAYADO","proveedores":["AZUL PATAGONIA"]},"411540007":{"desc":"SWEATER ROBLE","proveedores":["J.S. Purpura S.R.L."]},"412101002":{"desc":"PANTALON CARGO DEL NORTE HOMBRE","proveedores":["CITEX SRL"]},"412106029":{"desc":"PANTALON VIAJERO SECADO RAPIDO","proveedores":["BREA MARIA PAULA"]},"412106032":{"desc":"PANTALON DESMONTABLE","proveedores":["BREA MARIA PAULA"]},"412124001":{"desc":"BERMUDA ROMERILLO PINZADA POPLIN","proveedores":["RIEMERSO SA"]},"412500058":{"desc":"PANTALON ORIGEN DENIM","proveedores":["RIEMERSO SA"]},"412545002":{"desc":"PANTALON FELIPE DENIM","proveedores":["RIEMERSO SA"]},"413101031":{"desc":"CAMPERA RUSTICA","proveedores":["Lopez Omar Alexis"]},"444134005":{"desc":"CINTO HEBILLA FORRADA 35MM","proveedores":["Pionera S.A."]},"444134011":{"desc":"CINTO ALAMO 40MM","proveedores":["Pionera S.A."]},"511138100":{"desc":"CHOMBA DAMA BASICA PIQUE PAMPERO","proveedores":["Pampenorte S.R.L."]},"712106008":{"desc":"BABUCHA ROSAS SOFT SHELL DAMA","proveedores":["Armesto Maria Eugenia"]},"7798331470540":{"desc":"BOLSO DUOMO BAG 19 LTS GR","proveedores":["ARTICULOS PROMOCIONALES SA"]},"7798385662892":{"desc":"MOCHILA TRAFUL","proveedores":["ARTICULOS PROMOCIONALES SA"]},"7798385666784":{"desc":"BOTELLA HYDRA GO 750ML","proveedores":["ARTICULOS PROMOCIONALES SA"]},"7799176003306":{"desc":"BOLSO REMANSO","proveedores":["ARTICULOS PROMOCIONALES SA"]},"811122092":{"desc":"REMERA PETUNIA","proveedores":["C D Way S.A."]},"811122112":{"desc":"CAMISA JAUREGUI POPLIN","proveedores":["TORRES RODRIGO SEBASTIAN"]},"811122263":{"desc":"CAMISA RAUCH BRODERY","proveedores":["AZUL PATAGONIA"]},"811122315":{"desc":"CAMISA LUZ","proveedores":["AZUL PATAGONIA"]},"811124004":{"desc":"CAMISA MAIZANI M/L POPLIN Y FIBRANA","proveedores":["AZUL PATAGONIA"]},"811124033":{"desc":"CAMISA CLARA POPLIN RAYAS","proveedores":["TORRES RODRIGO SEBASTIAN"]},"811138001":{"desc":"POLO TREBOL BLANCO","proveedores":["C D Way S.A."]},"811140064":{"desc":"REMERA ALGODONILLO","proveedores":["C D Way S.A."]},"811140065":{"desc":"REMERA PUERTO PIRAMIDES","proveedores":["C D Way S.A."]},"811168026":{"desc":"REMERA CATEDRAL","proveedores":["C D Way S.A."]},"811500000":{"desc":"CAMISA MAIZANI DENIM M/L","proveedores":["TORRES RODRIGO SEBASTIAN"]},"811505001":{"desc":"CAMISA BASICA MAIZANI POPLIN LISO","proveedores":["AZUL PATAGONIA"]},"811508009":{"desc":"POLO TREBOL ROJO","proveedores":["C D Way S.A."]},"811527004":{"desc":"CAMISA BASICA 70/30 MAIZANI OXFORD RAYADO","proveedores":["AZUL PATAGONIA"]},"811533007":{"desc":"CAMISA BASICA MAIZANI POPLIN RAYADO","proveedores":["AZUL PATAGONIA"]},"812122225":{"desc":"BOMBACHA MARTINA","proveedores":["RIEMERSO SA"]},"812506036":{"desc":"PANTALON CUMBRES DENIM","proveedores":["RIEMERSO SA"]},"842135004":{"desc":"PASCHMINA A CUADROS","proveedores":["J.S. Purpura S.R.L."]},"842174023":{"desc":"COLLAR DIJE DOBLE C/ TIRAS GAMUZA","proveedores":[]},"844134010":{"desc":"CINTO 15MM","proveedores":["Pionera S.A."]},"844134013":{"desc":"CINTO CANELO FLOTER 30MM","proveedores":["Pionera S.A."]},"844134015":{"desc":"CINTO JAZMIN 30MM","proveedores":["Pionera S.A."]},"882106012":{"desc":"MOCHILA PEHUEN CO","proveedores":["Pionera S.A."]},"882106013":{"desc":"BOLSO PEHUEN CO","proveedores":["Pionera S.A."]},"944122002":{"desc":"FAJA GUARDA PAMPA NIÑO","proveedores":["Corbellini Pablo Andres"]},"A004":{"desc":"PANTALON BAHIA CLASICO 5 BOLS. H. PAMPERO","proveedores":["RIEMERSO SA"]},"A200":{"desc":"PANTALON ARECO GABARDINA C/LYCRA","proveedores":["RIEMERSO SA"]},"I004":{"desc":"CHALECO BASICO H. POLAR C/BOLS. PAMPERO","proveedores":["RANQUEL DEL PLATA SA"]},"I005":{"desc":"CAMPERA BASICA H.POLAR C/BOLS. PAMPERO","proveedores":["RANQUEL DEL PLATA SA"]},"I007":{"desc":"CHALECO BASICO TERMICO TRK PAMPERO","proveedores":["RANQUEL DEL PLATA SA"]},"I013":{"desc":"TRAJE DE LLUVIA BIL VEX","proveedores":["BAC-DALL ARGENTINA SA"]},"I026":{"desc":"MAMELUCO MANGA RANGLAN H. PAMPERO AZUL (50-60)","proveedores":["MACATA SA"]},"I042":{"desc":"CAMPERA ANORAK TERMICA TRUCKER PAMPERO","proveedores":["RANQUEL DEL PLATA SA"]},"I043":{"desc":"CAMPERA PARKA BIL VEX","proveedores":["BAC-DALL ARGENTINA SA"]},"I044":{"desc":"CAMPERA DRIVER BIL VEX PREMIUM CORTA","proveedores":["BAC-DALL ARGENTINA SA"]},"I051":{"desc":"BOTA PETROLERA CLASICA PAMPERO","proveedores":["RANQUEL DEL PLATA SA"]},"I060":{"desc":"BOTA PAMPERO JOB MASTER C.LARGA","proveedores":["INTENSIVO SA"]},"I062":{"desc":"BOTA PAMPERO JOB MASTER CON PUNTERA","proveedores":["INTENSIVO SA"]},"I065":{"desc":"BOTA NAUTICA C/CUELLO PVC C.LARGA PAMPERO","proveedores":["INTENSIVO SA"]},"I115":{"desc":"PANTALON CAZADOR CARGO II H. PAMPERO GRANDE (56-70)","proveedores":["MACATA SA"]},"I119":{"desc":"BERMUDA CARGO H. PAMPERO","proveedores":["MACATA SA"]},"I125":{"desc":"CAMISA DENIM FAC TOWN","proveedores":["FAC TOWN"]},"I207":{"desc":"BOTIN PA-709 C/BOX PU BIDENSIDAD","proveedores":["DENEB SA"]},"I213":{"desc":"BOTIN 1709 C/FLOR PU BIDENSIDAD","proveedores":["DENEB SA"]},"I272":{"desc":"BOTIN FUNDIDOR ELAS. 2519 S/PUNTA","proveedores":["DENEB SA"]},"I307":{"desc":"ZAPATILLA P1269 C/PUNTA","proveedores":["DENEB SA"]},"I312":{"desc":"ZAPATO 1609 C/FLOR C/PUNTA","proveedores":["DENEB SA"]},"I322":{"desc":"BOTIN ALENKE (2799) PAMPERO C/P","proveedores":["DENEB SA"]},"I326":{"desc":"CAMPERA DESCARNE SOLDADOR (S-3XL)","proveedores":["CANOR - NOGUERA CARLOS JAVIER"]},"I345":{"desc":"BOTA JOB MASTER PVC PAMPERO BLANCA","proveedores":["INTENSIVO SA"]},"I350":{"desc":"BOMBACHA LISA HOMBRE PAMPERO (56-60)","proveedores":["MACATA SA"]},"I352":{"desc":"BOMBACHA LISA H.PAMPERO AZUL (56-60)","proveedores":["MACATA SA"]},"I368":{"desc":"BALIZA INTERMITENTE P/CONO GRANDE","proveedores":["SIN MARCA"]},"I380":{"desc":"ZAP. P35 C/FLOR S/PUNTA","proveedores":["TKW S.A."]},"I461":{"desc":"BOTIN 1709 BLANCO C/FLOR C/PUNTA","proveedores":["DENEB SA"]},"I462":{"desc":"BOTIN BIDENSIDAD C/P P 901 DN PAMPERO","proveedores":["TKW S.A."]},"I479":{"desc":"PANTALON JEAN INDUS. WORKER","proveedores":["MACATA SA"]},"I545":{"desc":"BOTIN PAMPERO MARRON C/P P41FM","proveedores":["TKW S.A."]},"I546":{"desc":"BOTIN PAMPERO MARRON SIN PUNTERA P40FM","proveedores":["TKW S.A."]},"I548":{"desc":"BOTIN PAMPERO CUEROBOX C/P P91 BIDENSIDAD","proveedores":["TKW S.A."]},"I564":{"desc":"BOTIN P61 CUERO FLOR BIDENSIDAD C/PUNTA","proveedores":["TKW S.A."]},"I591":{"desc":"PANT. PAMPERO INDUS. H. JEAN (52-60)","proveedores":["MACATA SA"]},"I624":{"desc":"TRAJE DE LLUVIA SLAPPA","proveedores":["RINOTEC SRL"]},"I739":{"desc":"TRAJE DE LLUVIA PREMIUM BIL-VEX","proveedores":["BAC-DALL ARGENTINA SA"]},"I91BR":{"desc":"BOTIN PAMPERO BIDENS. BR 9001-3001","proveedores":["TKW S.A."]},"IC013":{"desc":"CAMISA DE TRABAJO H.M/L PAMPERO MED.(50-56)","proveedores":["MACATA SA"]},"IR123":{"desc":"PONCHO RESERO ECONOMICO","proveedores":["SIN MARCA"]},"N019":{"desc":"BOMBACHA LISA NIÑO PAMPERO","proveedores":["MACATA SA"]},"PA3010":{"desc":"ZAPATILLA 3010 PAMPERO TREKKING","proveedores":["DENEB SA"]},"RI249":{"desc":"BOXER PAMPERO","proveedores":["C D Way S.A."]},"U007":{"desc":"CAMISA ESTANCIERA Hombre. M/L PAMPERO","proveedores":["CITEX SRL"]},"U011":{"desc":"ALPARGATA REFORZADA ADULTO PAMPERO","proveedores":["CITEX SRL"]},"U030":{"desc":"BERMUDA CONDORES PAMPERO","proveedores":["CITEX SRL"]},"U034":{"desc":"PANTALON CARGO RIPSTOP CH (38-54) PAMPERO","proveedores":["MACATA SA"]},"U056":{"desc":"PANT. PAMPERO INDUS. H. JEAN (38-50)","proveedores":["MACATA SA"]},"U063":{"desc":"PANTALON BAHIA POPLIN C/LYCRA PAMPERO","proveedores":["RIEMERSO SA"]},"U070":{"desc":"CHALECO TRELEW H. MATELASEE PAMPERO","proveedores":["FOOTWEAR S.R.L"]},"U084":{"desc":"CINTO COIHUE LISO 40 ENGRASADO PAMPERO","proveedores":["Pionera S.A."]},"U088":{"desc":"CINTO TAPIAL H. 40 CUERO PAMPERO","proveedores":["Pionera S.A."]},"U089":{"desc":"CINTO CAVEN SUELA 40 MM PAMPERO","proveedores":["Pionera S.A."]},"U091":{"desc":"BILLETERA ALERCE H. COMB. LONA PAMPERO","proveedores":["Pionera S.A."]},"U102":{"desc":"BOMBACHA LISA MUJER PAMPERO","proveedores":["MACATA SA"]},"U11122003":{"desc":"CAMISA CAMPO","proveedores":["Lopez Omar Alexis"]},"U11157000":{"desc":"CAMISA RIPSTOP","proveedores":["Lopez Omar Alexis"]},"U122":{"desc":"PANTALON BARRACAS CLASICO M. PAMPERO","proveedores":["RIEMERSO SA"]},"U123":{"desc":"PANT. CANDELARIA M. C/LYCRA PAMPERO","proveedores":["RIEMERSO SA"]},"U145":{"desc":"PANTALON CARGO ELASTIZADO PAMPERO FIT","proveedores":["MACATA SA"]},"U159":{"desc":"CHALECO PEHUEN PAMPERO","proveedores":["RANQUEL DEL PLATA SA"]},"U176":{"desc":"BOMBACHA OLIVERA H. POPLIN","proveedores":["RIEMERSO SA"]},"U2000":{"desc":"BOTIN TREKKING LANIN","proveedores":["INTENSIVO SA"]},"U2001":{"desc":"BOTIN TREKKIN TRONADOR","proveedores":["INTENSIVO SA"]},"U2003":{"desc":"ZAPATILLA TREKKING OTTO","proveedores":["INTENSIVO SA"]},"U209":{"desc":"PANTALON CARGO RIPSTOP GR (56-60) PAMPERO","proveedores":["MACATA SA"]},"U237":{"desc":"CINTO YATAY BORD. ROMBO 25 PAMPERO","proveedores":["Pionera S.A."]},"U24001D":{"desc":"CAMISA MAIZANI LISO","proveedores":["AZUL PATAGONIA"]},"U325":{"desc":"TERMERA CUERO OLMOS","proveedores":["Pionera S.A."]},"U371":{"desc":"BOTIN RURAL ARRIERO","proveedores":["TKW S.A."]},"U372":{"desc":"BOTIN RURAL RODEO","proveedores":["TKW S.A."]},"U392":{"desc":"CINTO LARREA BORDADO 35MM","proveedores":["Pionera S.A."]},"U396":{"desc":"NECESSAIRE PICABUEY LONA CHICO","proveedores":["Pionera S.A."]},"U411":{"desc":"PANTALON DAMA CARGO DEL NORTE","proveedores":["CITEX SRL"]},"U41160000":{"desc":"AUSTRALIANO CLASICO","proveedores":["Mel Sombreros S.R.L."]},"U41160001":{"desc":"AUSTRALIANO CAZA Y PESCA","proveedores":["Mel Sombreros S.R.L."]},"U41171004":{"desc":"AUSTRALIANO PALMA VERDE","proveedores":["Mel Sombreros S.R.L."]},"U415":{"desc":"ALPARGATA YUTE REFORZADA","proveedores":["CITEX SRL"]},"U433":{"desc":"NECESSAIRE PICABUEY LONA GRANDE","proveedores":["PAMPERO"]},"U45106006":{"desc":"BOLSO HERCULES PORTA HERRAMIENTAS","proveedores":["INDUSTRIAL ZONDA SA"]},"U45106007":{"desc":"BOLSO MINERO PORTA HERRAMIENTAS","proveedores":["INDUSTRIAL ZONDA SA"]},"U45106008":{"desc":"BOLSO GLADIADOR PORTA HERRAMIENTAS","proveedores":["INDUSTRIAL ZONDA SA"]},"U45106009":{"desc":"ARQUITECTO PORTA HERRAMIENTA","proveedores":["INDUSTRIAL ZONDA SA"]},"U45106012":{"desc":"CONSTRUCTOR PORTA HERRAMIENTAS","proveedores":["INDUSTRIAL ZONDA SA"]},"U45121000":{"desc":"BOLSO CHAJARI","proveedores":["La Maquinola"]},"U45121001":{"desc":"MOCHILA MOCONA","proveedores":["La Maquinola"]},"U45121003":{"desc":"MOCHILA CORRIENTES","proveedores":["La Maquinola"]},"U45121005":{"desc":"COOLER USHUAIA","proveedores":["La Maquinola"]},"U45121006":{"desc":"BOLSO PUNTA TOMBO","proveedores":["La Maquinola"]},"U45121009":{"desc":"BOLSO MARINERO 10 LITROS","proveedores":["La Maquinola"]},"U45121012":{"desc":"BOLSO ROSARIO","proveedores":["La Maquinola"]},"U454":{"desc":"BOMBACHA ALUMINE M.POPLIN PAMP.","proveedores":["RIEMERSO SA"]},"U596":{"desc":"CAMISA CAIRO FAST DRY","proveedores":["MACATA SA"]},"U597":{"desc":"COLLAR VIDRIO FACETADO","proveedores":[]},"U616":{"desc":"FAJA TRINCADA 9CM","proveedores":["Corbellini Pablo Andres"]},"U721144001":{"desc":"ZAPATILLA TREKKING DAMA LEÑAS ROSA","proveedores":["INTENSIVO SA"]},"U751":{"desc":"CAMPERA SOFTSHELL PAMPERO IND.","proveedores":["RANQUEL DEL PLATA SA"]},"U81106000":{"desc":"NECESSAIRE PATAGONIA","proveedores":["Pionera S.A."]},"U82106000":{"desc":"MOCHILA EZEIZA","proveedores":["Pionera S.A."]},"U82106001":{"desc":"MOCHILA MAR DEL PLATA","proveedores":["Pionera S.A."]},"U82106005":{"desc":"VALIJA PATAGONIA GRANDE","proveedores":["Pionera S.A."]},"U82106006":{"desc":"BOLSO DE MANO PATAGONIA","proveedores":["Pionera S.A."]},"U82116001":{"desc":"TERMERA ARENA LONA","proveedores":["Pionera S.A."]},"U82116004":{"desc":"MORRAL QUILA","proveedores":["Pionera S.A."]},"U82157000":{"desc":"RIÑONERA HUELLA","proveedores":["Pionera S.A."]},"U82157001":{"desc":"MOCHILA PLEGABLE TRAVESIA","proveedores":["Pionera S.A."]},"04301":{"desc":"BOINA HILO TRAMA ROMBOS","proveedores":["Corbellini Pablo Andres"]},"244122010":{"desc":"FAJA DOBLE GUARDA 9CM","proveedores":["Corbellini Pablo Andres"]},"411124012":{"desc":"CAMISA SAN LUIS SEMI ABIERTO BOTON M/L RAYAS","proveedores":["AZUL PATAGONIA"]},"411527003":{"desc":"CAMISA SOLER CUELLO INGLES M/L CON BOL POPLIN","proveedores":["AZUL PATAGONIA"]},"411533000":{"desc":"CAMISA SOLER CUELLO INGLES POPLIN RAYADO","proveedores":["AZUL PATAGONIA"]},"412500053":{"desc":"PANTALON QUEBRACHO RECTO DENIM","proveedores":["RIEMERSO SA"]},"441106009":{"desc":"CINTO GALON SAUCE 35MM","proveedores":["Pionera S.A."]},"441141006":{"desc":"GORRO ROCKY FORRADO","proveedores":["J.S. Purpura S.R.L."]},"441173006":{"desc":"GORRA CHAPLIN","proveedores":["J.S. Purpura S.R.L."]},"444106000":{"desc":"CINTO GALON SAUCE 40MM","proveedores":["Pionera S.A."]},"5054000016":{"desc":"TERMO IVY ACERO 1LTR.","proveedores":["ARTICULOS PROMOCIONALES SA"]},"711106020":{"desc":"CAMISA MUJER MILA TECNICA","proveedores":["Armesto Maria Eugenia"]},"7798127209316":{"desc":"MATERA ARCE","proveedores":["ARTICULOS PROMOCIONALES SA"]},"7798385664742":{"desc":"BOTELLA TERMICA DAIRY","proveedores":["ARTICULOS PROMOCIONALES SA"]},"812124008":{"desc":"BOMBACHA MORA FANTASIA","proveedores":["RIEMERSO SA"]},"882116013":{"desc":"MOCHILA REGIMiENTO","proveedores":["Pionera S.A."]},"I010":{"desc":"BUZO BASICO H.FRIZA PAMPERO","proveedores":["GUADAL RM SRL"]},"I012":{"desc":"CAPA DE LLUVIA BIL VEX","proveedores":["BAC-DALL ARGENTINA SA"]},"I029":{"desc":"PANTALON TRUCKER TERMICO PAMPERO","proveedores":["RANQUEL DEL PLATA SA"]},"I052":{"desc":"ZAPATO CONSTRUCTOR C/P PU PAMPERO","proveedores":["PAMPERO"]},"I073":{"desc":"GUANTE TERRYCLOTH KEVLAR 28 CM PAMPERO","proveedores":["INDUSTRIAL ZONDA SA"]},"I079":{"desc":"GUANTE PVC PESADO LARGO  PAMPERO 70 CM","proveedores":["INDUSTRIAL ZONDA SA"]},"I099":{"desc":"BOMBACHA URION H.LIVIANA PAMPERO","proveedores":["MACATA SA"]},"I117":{"desc":"PANTALON CAZ. CARGO II H. PAMPERO AZUL CH (36-54)","proveedores":["MACATA SA"]},"I218":{"desc":"PANTALON CARGO DAMA PAMPERO","proveedores":["MACATA SA"]},"I351":{"desc":"BOMBACHA LISA H. PAMPERO AZUL (38-54)","proveedores":["MACATA SA"]},"I560":{"desc":"BOTIN BAQUEANO S/P PAMPERO","proveedores":["RANQUEL DEL PLATA SA"]},"I565":{"desc":"ZAPATO P45 MARRON CUERO FLOR S/P","proveedores":["TKW S.A."]},"I744":{"desc":"ARNES C/TOMA FRONTAL (SIN CABO)","proveedores":["INDUSTRIAL ZONDA SA"]},"IA12":{"desc":"AMBO UNISEX PAMPERO MICROFIBRA C/ SPANDEX","proveedores":["Coverline SRL"]},"U036":{"desc":"CAMISA OXFORD H. M/L PLUSNORTE","proveedores":["Pampenorte S.R.L."]},"U100":{"desc":"CAMISA ESTANCIERA Mujer M/L PAMPERO","proveedores":["CITEX SRL"]},"U150":{"desc":"TERMO IGUAZU 1.1 LIT. PAMPERO","proveedores":["ARTICULOS PROMOCIONALES SA"]},"U35173001":{"desc":"MASCARILLA RESPIRABLE MENDOZA C/VALVULA","proveedores":["Total Protect S. R. L."]},"U44121000":{"desc":"RIÑONERA LAS GRUTAS","proveedores":["La Maquinola"]},"U45106010":{"desc":"FUNDA PARA BALDE","proveedores":["INDUSTRIAL ZONDA SA"]},"U45106011":{"desc":"CLAVERA DOBLE PORTA HERRAMIENTAS","proveedores":["INDUSTRIAL ZONDA SA"]},"U45106013":{"desc":"PORTA TALADRO PORTA HERRAMIENTAS","proveedores":["INDUSTRIAL ZONDA SA"]},"U45106014":{"desc":"DURLOCKERO PORTA HERRAMIENTAS","proveedores":["INDUSTRIAL ZONDA SA"]},"U45106015":{"desc":"CINTURON TACTICO PORTA HERRAMIENTAS","proveedores":["INDUSTRIAL ZONDA SA"]},"U45121004":{"desc":"MOCHILA CALAMUCHITA","proveedores":["La Maquinola"]},"U45173002":{"desc":"CUCHILLO BRANGUS COMBINADO 26cm","proveedores":["Zeaiter Juan Sarquis"]},"U45173004":{"desc":"CUCHILLO CIERVO AXIS 20CM","proveedores":["Zeaiter Juan Sarquis"]},"U45173124":{"desc":"JUEGO DE MESA 12CM","proveedores":["Zeaiter Juan Sarquis"]},"U585":{"desc":"SILLA PLEGABLE PLUS","proveedores":["ARTICULOS PROMOCIONALES SA"]},"U601":{"desc":"CHALECO CANVAS","proveedores":["MACATA SA"]},"U82106004":{"desc":"VALIJA PATAGONIA","proveedores":["Pionera S.A."]},"244122011":{"desc":"FAJA GUARDA INCAICA 9CM","proveedores":["Corbellini Pablo Andres"]},"7798385662922":{"desc":"MOCHILA ESQUEL","proveedores":["ARTICULOS PROMOCIONALES SA"]},"7798385664780":{"desc":"BOTELLA ATUEL","proveedores":["ARTICULOS PROMOCIONALES SA"]},"811503000":{"desc":"CAMISA OXFORD DAMA SANTA ROSA","proveedores":["CITEX SRL"]},"842134000":{"desc":"GARGANTILLA TIRAS GAMUZA","proveedores":["Guffanti Silvia Helena"]},"942141000":{"desc":"BUFANDA LISA","proveedores":["J.S. Purpura S.R.L."]},"I006":{"desc":"BUZO BASICO H.POLAR 1/2 CIERRE PAMPERO","proveedores":["RANQUEL DEL PLATA SA"]},"I038":{"desc":"PANTALON DE TRAB. H. PAMPERO AZUL CH(36-60)","proveedores":["MACATA SA"]},"I055":{"desc":"BOTIN  BOX CONSTRUCTOR PAMPERO","proveedores":["TKW S.A."]},"I092":{"desc":"PROTECTOR LUMBAR PAMPERO","proveedores":["INDUSTRIAL ZONDA SA"]},"I094":{"desc":"CABO DE AMARRE SUJECION REGULABLE 1.5 MTS","proveedores":["INDUSTRIAL ZONDA SA"]},"I376":{"desc":"BOTIN P700 TITAN C/FLOR S/PUNTA","proveedores":["TKW S.A."]},"I382":{"desc":"JEAN DAMA IND. ELASTIZADO PAMPERO","proveedores":["MACATA SA"]},"I503":{"desc":"CHALECO MINERO  REFLECTIVO PAMPERO","proveedores":["MACATA SA"]},"I508":{"desc":"BERMUDA RIPSTOP PAMPERO CH. (38-54)","proveedores":["MACATA SA"]},"I585":{"desc":"CAMISA DE TRAB. H M/L JEAN PAMPERO (50-60)","proveedores":["MACATA SA"]},"I606":{"desc":"BOTIN P401 BOX C/PUNTA PU AMARILLA","proveedores":["DENEB SA"]},"I743":{"desc":"ARNES STANDAR (SIN CABO)411","proveedores":["INDUSTRIAL ZONDA SA"]},"I745":{"desc":"CABO DE AMARRE DOBLE - MOSQ. 55. - AMORTIGUACION","proveedores":["INDUSTRIAL ZONDA SA"]},"IC017":{"desc":"CAMISA DE TRAB H.M/L PAMPERO AZUL G(58-70)","proveedores":["MACATA SA"]},"U386":{"desc":"GORRO AUSTRALIANO ADULTOS","proveedores":["J.S. Purpura S.R.L."]},"U45121011":{"desc":"BOLSO CONCORDIA","proveedores":["La Maquinola"]},"U45121013":{"desc":"NECESSAIRE ITATI","proveedores":["La Maquinola"]},"U45173001":{"desc":"CUCHILLO BRANGUS COMBINADO 20cm","proveedores":["Zeaiter Juan Sarquis"]},"U785":{"desc":"GORRA SANTA FE MESH COMBINADA","proveedores":["ARTICULOS PROMOCIONALES SA"]},"136533013":{"desc":"CABO DE AMARRE SUJECION REGULABLE 1.5 MTS MOSQ FORJADO 55MM","proveedores":["INDUSTRIAL ZONDA SA"]},"143513005":{"desc":"MEDIA INVISIBLE LUNARES X3","proveedores":["ELIHO TEXTIL S.R.L"]},"I076":{"desc":"GUANTE ACRILO 38MM/33CM VERDE TALLES 7 A 11","proveedores":["BAC-DALL ARGENTINA SA"]},"I140":{"desc":"ANTEOJO LIBUS ARGON GRIS","proveedores":["INDUSTRIAL ZONDA SA"]},"I170":{"desc":"GUANTE PVC POLAR FLUOR 35 CM","proveedores":["BAC-DALL ARGENTINA SA"]},"I2040":{"desc":"PONCHO RESERO POLIESTER LEMBU","proveedores":["RINOTEC SRL"]},"IC016":{"desc":"CAMISA DE TRAB H.M/L PAMPERO AZUL M(50-56)","proveedores":["MACATA SA"]},"U00173507":{"desc":"CANDADO PAMPERO","proveedores":["Pionera S.A."]},"U45121002":{"desc":"MOCHILA IGUAZU","proveedores":["La Maquinola"]},"U45173010":{"desc":"CUCHILLO BRANGUS COMBINADO 14cm","proveedores":["Zeaiter Juan Sarquis"]},"U80134002":{"desc":"BILLETERA OLIVA","proveedores":["Pionera S.A."]},"481134101":{"desc":"BILLETERA ROJAS","proveedores":["Pionera S.A."]},"7799176002316":{"desc":"TERMO AVANZA 1lt","proveedores":["ARTICULOS PROMOCIONALES SA"]},"I002":{"desc":"CAMISA DE TRABAJO H. M/L DENIM JEAN PAMPERO (38/48)","proveedores":["MACATA SA"]},"I145":{"desc":"MENTONERA LIBUS P/CASCO","proveedores":["INDUSTRIAL ZONDA SA"]},"IC014":{"desc":"CAMISA DE TRABAJO H.M/L PAMPERO GRANDE(58-70)","proveedores":["MACATA SA"]},"P258":{"desc":"PARAGUAS RAINY","proveedores":["ARTICULOS PROMOCIONALES SA"]},"U31173002":{"desc":"MASCARA DE SOLDAR TALAMPAYA","proveedores":["Total Protect S. R. L."]},"U398":{"desc":"BILLETERA PUNA CUERO","proveedores":["Pionera S.A."]},"U45119002":{"desc":"PORTA MATE PARA AUTO","proveedores":["Zeaiter Juan Sarquis"]},"U72173001":{"desc":"TERMO ACONCAGUA","proveedores":["ARTICULOS PROMOCIONALES SA"]},"143513002":{"desc":"MEDIA CAÑA 3/4 ALG X3","proveedores":["ELIHO TEXTIL S.R.L"]},"I401":{"desc":"TRAJE PREMIUM MOTO STYLE PAMPERO","proveedores":["SAFETY SOLUTION SA"]},"U00173508":{"desc":"PLANTILLA PU GEL","proveedores":["INTENSIVO SA"]},"U45106018":{"desc":"ELECTRICISTA PORTA HERRAMIENTA","proveedores":["INDUSTRIAL ZONDA SA"]},"U45173168":{"desc":"MATE TUPUNGATO","proveedores":["Zeaiter Juan Sarquis"]},"7799176008042":{"desc":"MATERA ESTRIBO POLIESTILENO","proveedores":["ARTICULOS PROMOCIONALES SA"]},"843173010":{"desc":"PULSERA TRENZADA GAMUZA PAMPERO","proveedores":[]},"I069":{"desc":"CASCO LIBUS MILENIUM CLASS S/ARNES","proveedores":["INDUSTRIAL ZONDA SA"]},"I335":{"desc":"PROTECTOR AUDITIVO ALTERNATIVE TIPO COPA LIBUS","proveedores":["INDUSTRIAL ZONDA SA"]},"241122011":{"desc":"BOINA GUARDA PAMPA 32CM","proveedores":["Corbellini Pablo Andres"]},"843154000":{"desc":"PULSERA TIRAS GAMUZA COMBINADAS","proveedores":[]},"I108":{"desc":"GUANTE REFORCER C/KEVLAR","proveedores":["PAMPERO"]},"L452":{"desc":"LLAVERO DESTAPADOR","proveedores":["ARTICULOS PROMOCIONALES SA"]},"U42134000":{"desc":"PASAPAÑUELO CUERO","proveedores":["Guffanti Silvia Helena"]},"U43173000":{"desc":"PULSERA PIEDRA VOLCANICA","proveedores":["Guffanti Silvia Helena"]},"U529":{"desc":"ROSARIO COLLAR PAMPERO","proveedores":[]},"U533":{"desc":"BOMBILLA ALPACA PAMPERO","proveedores":[]},"U550":{"desc":"PULSERA DECENARIO","proveedores":[]},"U557":{"desc":"PULSERA CUERO DIJE CUADRADO","proveedores":[]},"441143002":{"desc":"GORRA CHARLES","proveedores":["J.S. Purpura S.R.L."]},"442173002":{"desc":"BUFANDA ESCOCESA","proveedores":["J.S. Purpura S.R.L."]},"641122000":{"desc":"BOINA DAMA PAMPERO","proveedores":["Corbellini Pablo Andres"]},"842173011":{"desc":"ROSARIO COLLAR SEMILLAS","proveedores":[]},"I611":{"desc":"BANDOLERA C/REFLEC. REPARTIDA GENERICA","proveedores":["PADREVECCHI EDITH AIDA"]},"U45134003":{"desc":"MATE ACONCAGUA PAMPERO","proveedores":["Zeaiter Juan Sarquis"]},"U45173011":{"desc":"MATE LANIN  MADERA","proveedores":["Zeaiter Juan Sarquis"]},"U45173132":{"desc":"BOMBILLA CINCELADA PAMPERO","proveedores":["Zeaiter Juan Sarquis"]},"U555":{"desc":"BRAZALETE CUERO CALADO","proveedores":[]},"U45173162":{"desc":"MATE CHALTEN","proveedores":["Zeaiter Juan Sarquis"]},"U667":{"desc":"CHAPA Nº2 25X35","proveedores":["Recalde Gaston Alberto"]},"143122002":{"desc":"CAÑA 3/4 ALG PACK 3 MOD 4","proveedores":["ELIHO TEXTIL S.R.L"]},"143122006":{"desc":"CAÑA 3/4 ALG PACK 3 MOD1URB","proveedores":["ELIHO TEXTIL S.R.L"]},"143122007":{"desc":"CAÑA BAJA MICROFIBRA PACK 3 MOD5","proveedores":["ELIHO TEXTIL S.R.L"]},"143128005":{"desc":"MICROFIBRA 3/4 PACK 3","proveedores":["ELIHO TEXTIL S.R.L"]},"143513001":{"desc":"MEDIA CAÑA BAJA ALG X3","proveedores":["ELIHO TEXTIL S.R.L"]},"I107":{"desc":"GUANTE NITRILO AZUL DOBLE BAÑO PUÑO LONA","proveedores":["BAC-DALL ARGENTINA SA"]},"I356":{"desc":"DELANTAL DESCARNE SIMPLE","proveedores":["CANOR - NOGUERA CARLOS JAVIER"]},"U33173004":{"desc":"PROTECTOR AUDITIVO PACIFICO","proveedores":["Total Protect S. R. L."]},"U44122003":{"desc":"BOINA BORDADO ESCUDO NACIONAL","proveedores":["Corbellini Pablo Andres"]},"U45119000":{"desc":"MATERA TILCARA PAMPERO","proveedores":["Zeaiter Juan Sarquis"]},"U45173125":{"desc":"BOMBILLA CHICA PAMPERO","proveedores":["Zeaiter Juan Sarquis"]},"U45173126":{"desc":"BOMBILLA GRANDE PAMPERO","proveedores":["Caria Francisco Felix"]},"I146":{"desc":"ANTIPARRA LIBUS NEW CLASSIC HC TRANSPARENTE","proveedores":["INDUSTRIAL ZONDA SA"]},"U525":{"desc":"PASAPAÑUELO LISO PAMPERO","proveedores":[]},"143128011":{"desc":"CAÑA INVISIBLE MICROFIBRA  MOD3XST","proveedores":["ELIHO TEXTIL S.R.L"]},"I136":{"desc":"ANTEOJO ECOLINE GRIS LIBUS","proveedores":["INDUSTRIAL ZONDA SA"]},"U45119001":{"desc":"SET YERBERO Y AZUCARERO CUERO","proveedores":["Zeaiter Juan Sarquis"]},"I090":{"desc":"ARNES LIBUS MILENIUM SIMPLE P/CASCO","proveedores":["INDUSTRIAL ZONDA SA"]},"I118":{"desc":"PANTALON CAZ. CARGO II H. PAMPER AZUL GD (56-70)","proveedores":["MACATA SA"]},"U31173001":{"desc":"MENTONERA CORDILLERA","proveedores":["Total Protect S. R. L."]},"U33173003":{"desc":"PROTECTOR AUDITIVO ALERCES","proveedores":["Total Protect S. R. L."]},"442106005":{"desc":"PAÑUELO ESTAMPADO","proveedores":["Guffanti Silvia Helena"]},"U33173001":{"desc":"PROTECTOR AUDITIVO BARITU","proveedores":["Total Protect S. R. L."]},"U497":{"desc":"BOINA VASCA ALG. PAMPERO 32 CM","proveedores":["Corbellini Pablo Andres"]},"I377":{"desc":"ARNES P/CASCO C/CREMALLERA LIBUS","proveedores":["INDUSTRIAL ZONDA SA"]},"U215":{"desc":"YERBA MATE PAMPERO","proveedores":["CITEX SRL"]},"143128000":{"desc":"TERMICA ALTA MICROFIBRA PAR","proveedores":["ELIHO TEXTIL S.R.L"]},"I150":{"desc":"POLAINAS DESCARNE C/TIRAS","proveedores":["CANOR - NOGUERA CARLOS JAVIER"]},"U31173000":{"desc":"CASCO DE SEGURIDAD LANIN","proveedores":["Total Protect S. R. L."]},"I127":{"desc":"DELANTAL PVC LIVIANO BLANCO","proveedores":["BAC-DALL ARGENTINA SA"]},"I109":{"desc":"GUANTE DESCARNE P/LARGO","proveedores":["CANOR - NOGUERA CARLOS JAVIER"]},"143128100":{"desc":"MEDIA TERMICA MICROFIBRA","proveedores":["ELIHO TEXTIL S.R.L"]},"I137":{"desc":"CHALECO REFLECTIVO AMARILLO","proveedores":["SIN MARCA"]},"I138":{"desc":"CHALECO REFLECTIVO NARANJA","proveedores":["SIN MARCA"]},"I286":{"desc":"PONCHO LIVIANO LLUVIA PAMPERO PVC","proveedores":["SAFETY SOLUTION SA"]},"I077":{"desc":"GUANTE MEDIO PASEO VAQUETA AMARILLO  T-10","proveedores":["CANOR - NOGUERA CARLOS JAVIER"]},"U35173000":{"desc":"MASCARILLA RESPIRABLE MENDOZA","proveedores":["Total Protect S. R. L."]},"136106015":{"desc":"GUANTE TOUCH - POLIESTER PU- PAMPERO","proveedores":["INDUSTRIAL ZONDA SA"]},"U32173000":{"desc":"ANTEOJO DE SEGURIDAD CHIMANGO","proveedores":["Total Protect S. R. L."]},"I084":{"desc":"GUANTE DESCARNE CORTO","proveedores":["CANOR - NOGUERA CARLOS JAVIER"]},"I134":{"desc":"ANTEOJO LIBUS MOD. ARGON TRANSPARENTE","proveedores":["INDUSTRIAL ZONDA SA"]},"U32173001":{"desc":"ANTEOJO DE SEGURIDAD CONDOR","proveedores":["Total Protect S. R. L."]},"U33173000":{"desc":"TAPON AUDITIVO SIERRA","proveedores":["Total Protect S. R. L."]},"I460":{"desc":"GUANTE ALGODON  MOTEADO GAMISOL","proveedores":["GAMISOL Y CIA SA"]},"U33173002":{"desc":"TAPON AUDITIVO VALLE TRIALETA","proveedores":["Total Protect S. R. L."]},"I080":{"desc":"GUANTE ECO MOTEADO PAMPERO","proveedores":["INDUSTRIAL ZONDA SA"]}};
+const ALL_PROVEEDORES = ["ARTICULOS PROMOCIONALES SA","AZUL PATAGONIA","Armesto Maria Eugenia","BAC-DALL ARGENTINA SA","BREA MARIA PAULA","C D Way S.A.","CANOR - NOGUERA CARLOS JAVIER","CITEX SRL","Caria Francisco Felix","Corbellini Pablo Andres","Coverline SRL","DENEB SA","ELIHO TEXTIL S.R.L","FAC TOWN","FOOTWEAR S.R.L","GAMISOL Y CIA SA","GUADAL RM SRL","Guffanti Silvia Helena","INDUSTRIAL ZONDA SA","INTENSIVO SA","J.S. Purpura S.R.L.","La Maquinola","La Pettit S.A.","Lopez Omar Alexis","MACATA SA","MP NEGOCIOS ARGENTINA SA","Mel Sombreros S.R.L.","PADREVECCHI EDITH AIDA","PAMPERO","Pampenorte S.R.L.","Pionera S.A.","RANQUEL DEL PLATA SA","RIEMERSO SA","RINOTEC SRL","Recalde Gaston Alberto","SAFETY SOLUTION SA","SIN MARCA","TKW S.A.","TORRES RODRIGO SEBASTIAN","Total Protect S. R. L.","Zeaiter Juan Sarquis"];
+
+// Artículos MACATA que deben sumarse bajo un único código canónico
+const CODIGO_ALIAS = {
+  'I115':'I116','I117':'I116','I118':'I116',        // Pantalón Cazador Cargo II
+  'I350':'I102','I351':'I102','I352':'I102',        // Bombacha Lisa Hombre
+  'I038':'I036',                                    // Pantalón de Trabajo
+  'IC013':'IC012','IC014':'IC012','IC015':'IC012','IC016':'IC012','IC017':'IC012' // Camisa de Trabajo H.M/L
+};
+const ALIAS_DESC = {
+  'I116':'PANTALON CAZADOR CARGO II H. PAMPERO',
+  'I102':'BOMBACHA LISA HOMBRE PAMPERO',
+  'I036':'PANTALON DE TRABAJO H. PAMPERO',
+  'IC012':'CAMISA DE TRABAJO H.M/L PAMPERO'
+};
+
+function getCatalog(codigo) {
+  if (!codigo) return null;
+  const k = Object.keys(CATALOG).find(k => k.toUpperCase() === codigo.toUpperCase());
+  return k ? CATALOG[k] : null;
+}
+
+let allCards = [], allLists = [], fieldDefs = [];
+let knownConfirmedIds = null;
+let activeKpi = null;
+let debugLog = [];
+
+function log(msg) {
+  debugLog.push(msg);
+  const el = document.getElementById('debugPanel');
+  if (el) { el.innerHTML = debugLog.slice(-40).map(l=>`<div>${l}</div>`).join(''); el.scrollTop=el.scrollHeight; }
+}
+function toggleDebug() {
+  const el = document.getElementById('debugPanel');
+  el.style.display = el.style.display==='none' ? 'block' : 'none';
+}
+
+function api(endpoint) {
+  const sep = endpoint.includes('?') ? '&' : '?';
+  return fetch(`https://api.trello.com/1${endpoint}${sep}key=${API_KEY}&token=${TOKEN}`)
+    .then(r => { if (!r.ok) throw new Error('HTTP '+r.status); return r.json(); });
+}
+
+function diasDesdeCreacion(cardId) {
+  if (!cardId) return null;
+  try { return Math.floor((Date.now() - parseInt(cardId.substring(0,8),16)*1000) / 86400000); }
+  catch(e) { return null; }
+}
+
+function diasChip(n) {
+  if (n===null) return '<span class="dias-none">—</span>';
+  if (n<10)  return `<span class="dias-chip dias-green">🟢 ${n}d</span>`;
+  if (n<=20) return `<span class="dias-chip dias-yellow">🟡 ${n}d</span>`;
+  return `<span class="dias-chip dias-red">🔴 ${n}d</span>`;
+}
+
+function statusPill(name) {
+  const n=(name||'').toLowerCase();
+  if (n.includes('confirmad')) return `<span class="status-pill pill-confirmado">${name}</span>`;
+  if (n.includes('proceso'))   return `<span class="status-pill pill-proceso">${name}</span>`;
+  if (n.includes('complet'))   return `<span class="status-pill pill-completado">${name}</span>`;
+  if (n.includes('despacha'))  return `<span class="status-pill pill-despachado">${name}</span>`;
+  return `<span class="status-pill pill-proceso">${name}</span>`;
+}
+
+function listColor(name) {
+  const n=(name||'').toLowerCase();
+  if (n.includes('confirmad')) return 'var(--accent)';
+  if (n.includes('proceso'))   return 'var(--accent2)';
+  if (n.includes('complet'))   return 'var(--purple)';
+  if (n.includes('despacha'))  return 'var(--success)';
+  return 'var(--muted)';
+}
+
+function skuClass(status) {
+  const s=(status||'').toLowerCase();
+  if (s.includes('complet')||s.includes('listo')) return 'sku-completado';
+  if (s.includes('pedido')) return 'sku-pedido';
+  return 'sku-sin-pedir';
+}
+
+function parseSKU(skuStr) {
+  const parts=(skuStr||'').split('-');
+  return { codigo:parts[0]||skuStr, color:parts[1]||'—', talle:parts[2]||'—' };
+}
+
+function resolveFieldValue(item) {
+  const def=fieldDefs.find(f=>f.id===item.idCustomField);
+  if (!def) return null;
+  let value='';
+  if (def.type==='list'&&item.idValue) {
+    const opt=(def.options||[]).find(o=>o.id===item.idValue);
+    value=opt?opt.value.text:'';
+  } else if (item.value) {
+    if (item.value.text!==undefined)    value=item.value.text;
+    if (item.value.number!==undefined)  value=String(item.value.number);
+    if (item.value.checked!==undefined) value=item.value.checked?'true':'false';
+    if (item.value.date!==undefined)    value=item.value.date;
+  }
+  return { name:def.name, value };
+}
+
+function buildFieldMap(customFieldItems) {
+  const map={};
+  (customFieldItems||[]).forEach(item=>{
+    const r=resolveFieldValue(item);
+    if (r&&r.value!=='') map[r.name]=r.value;
+  });
+  return map;
+}
+
+function getField(map,...keywords) {
+  const keys=Object.keys(map);
+  for (const kw of keywords) { const k=keys.find(k=>k.toLowerCase()===kw.toLowerCase()); if (k) return map[k]||''; }
+  for (const kw of keywords) { const k=keys.find(k=>k.toLowerCase().includes(kw.toLowerCase())); if (k) return map[k]||''; }
+  return '';
+}
+
+function extractSKUs(map) {
+  const skus=[];
+  for (let i=1;i<=10;i++) {
+    const skuVal=getField(map,`Falta SKU ${i}`,`Falta SKU${i}`);
+    if (!skuVal) continue;
+    const qty   =getField(map,`Cantidad SKU ${i}`,`Cantidad SKU${i}`);
+    const status=getField(map,`Status SKU ${i}`,`Status SKU${i}`);
+    skus.push({ sku:skuVal.trim(), qty:qty.trim(), status:status.trim() });
+  }
+  return skus;
+}
+
+function requiresCompra(skus) {
+  return skus.some(s=>{ if (!s.sku) return false; const st=(s.status||'').toLowerCase(); return !st||st.includes('sin'); });
+}
+
+function abcBadge(abc, pct, cum) {
+  const cfg = abc==='A' ? {bg:'#dcfce7',color:'#15803d',border:'#bbf7d0'} :
+               abc==='B' ? {bg:'#fef3c7',color:'#b45309',border:'#fde68a'} :
+                           {bg:'#f3f4f6',color:'#6b7280',border:'#e5e7eb'};
+  const rec = abc==='A' ? 'Prioridad alta' : abc==='B' ? 'Mantener' : 'Revisar / mín.';
+  return '<span style="display:inline-flex;align-items:center;gap:4px;margin-left:2px;flex-shrink:0">'+
+    '<span style="font-size:.62rem;background:'+cfg.bg+';color:'+cfg.color+';border:1px solid '+cfg.border+';border-radius:4px;padding:1px 6px;font-family:var(--mono);font-weight:700">'+abc+'</span>'+
+    '<span style="font-size:.62rem;color:var(--muted);font-family:var(--mono)">'+pct.toFixed(1)+'%</span>'+
+    '<span style="font-size:.62rem;color:var(--muted);font-family:var(--mono)">acum.'+cum.toFixed(1)+'%</span>'+
+    '<span style="font-size:.62rem;color:'+cfg.color+';font-family:var(--mono)">'+rec+'</span>'+
+    '</span>';
+}
+
+// Mini tabla de pedidos para uso en expansiones
+function miniPedidoRows(cardList) {
+  return cardList.map(c=>`
+    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid var(--border);">
+      <div style="flex:1;min-width:0;overflow:hidden">
+        <div style="font-size:0.83rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:0.4rem;flex-wrap:nowrap;overflow:hidden">
+          ${statusPill(c.listName)}
+          ${c.vendedor?`<span style="color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">· 👤 ${c.vendedor}</span>`:''}
+        </div>
+      </div>
+      <div style="flex-shrink:0">${diasChip(c.diasCreacion)}</div>
+      <a href="${c.shortUrl}" target="_blank" class="trello-link" style="flex-shrink:0">→</a>
+    </div>`).join('');
+}
+
+// ── Alertas ───────────────────────────────────────────────────────────────────
+function checkNewConfirmed(cards) {
+  const confirmedList=allLists.find(l=>l.name.toLowerCase().includes('confirmad'));
+  if (!confirmedList) return;
+  const current=cards.filter(c=>c.idList===confirmedList.id);
+  const currentIds=new Set(current.map(c=>c.id));
+  if (knownConfirmedIds===null) {
+    knownConfirmedIds=currentIds;
+    current.filter(c=>c.hasFalt).forEach(c=>showAlert(c,'confirmado-faltante'));
+    return;
+  }
+  current.filter(c=>!knownConfirmedIds.has(c.id)).forEach(c=>showAlert(c,'nuevo'));
+  knownConfirmedIds=currentIds;
+}
+
+function showAlert(card, tipo) {
+  const container=document.getElementById('alertsContainer');
+  const div=document.createElement('div');
+  const isFaltante = tipo === 'confirmado-faltante';
+  const sinPedirSkus=card.skus.filter(s=>s.sku&&(!s.status||(s.status||'').toLowerCase().includes('sin')));
+  const tieneFalt = sinPedirSkus.length > 0;
+  const esNuevoConFalt = tipo === 'nuevo' && tieneFalt;
+  const useRed = isFaltante || esNuevoConFalt;
+  div.style.cssText=`background:${useRed?'rgba(247,97,79,0.08)':'rgba(79,142,247,0.08)'};border:1px solid ${useRed?'rgba(247,97,79,0.3)':'rgba(79,142,247,0.3)'};border-radius:10px;padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:1rem;animation:slideIn 0.4s ease;margin-bottom:0.5rem`;
+  const skuLines=tieneFalt
+    ?sinPedirSkus.map(s=>{
+        const p=parseSKU(s.sku);
+        const info=getCatalog(p.codigo);
+        const nombre=info?info.desc.slice(0,35)+(info.desc.length>35?'…':''):p.codigo;
+        return `<span style="font-family:var(--mono);font-size:0.72rem">${p.codigo} · ${nombre} · ${p.color} T${p.talle} — ${s.qty||'?'} un.</span>`;
+      }).join('<br>')
+    :'';
+  let title;
+  if (isFaltante) {
+    title = `⚠️ Pedido confirmado con faltantes: ${card.name}`;
+  } else if (esNuevoConFalt) {
+    title = `🔔 Nuevo pedido — ${sinPedirSkus.length} faltante${sinPedirSkus.length>1?'s':''}: ${card.name}`;
+  } else {
+    title = `🔔 Nuevo pedido confirmado: ${card.name}`;
+  }
+  div.innerHTML=`
+    <div style="flex:1">
+      <div style="font-family:var(--display);font-size:0.88rem;font-weight:700;color:${useRed?'#f7a49f':'#7ab0ff'};margin-bottom:0.3rem">${title}</div>
+      <div style="font-size:0.8rem;color:var(--muted);line-height:1.6">
+        ${card.vendedor?`Vendedor: <strong style="color:var(--text)">${card.vendedor}</strong>`:''}
+        ${card.customVal&&!card.customVal.toLowerCase().includes('no requiere')?` · Customización: ${card.customVal}`:''}
+        ${skuLines?`<br><span style="color:var(--muted);font-size:0.7rem;text-transform:uppercase;letter-spacing:0.05em">Faltantes sin pedir:</span><br>${skuLines}`:''}
+      </div>
+    </div>
+    <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:1rem;padding:0 0.25rem;flex-shrink:0">✕</button>`;
+  container.appendChild(div);
+  if (tipo === 'nuevo' && !tieneFalt) setTimeout(()=>{ if (div.parentElement) div.remove(); },30000);
+}
+
+// ── Connect ───────────────────────────────────────────────────────────────────
+async function connect() {
+  API_KEY =document.getElementById('apiKey').value.trim();
+  TOKEN   =document.getElementById('token').value.trim();
+  BOARD_ID=document.getElementById('boardId').value.trim();
+  const err=document.getElementById('errorMsg');
+  err.style.display='none';
+  if (!API_KEY||!TOKEN||!BOARD_ID) { err.textContent='Completá todos los campos.'; err.style.display='block'; return; }
+  const btn=document.querySelector('#setup .btn');
+  btn.disabled=true; btn.textContent='Conectando...';
+  try {
+    const board=await api(`/boards/${BOARD_ID}?`);
+    localStorage.setItem('trello_key',API_KEY);
+    localStorage.setItem('trello_token',TOKEN);
+    localStorage.setItem('trello_board',BOARD_ID);
+    document.getElementById('boardName').textContent=board.name;
+    document.getElementById('setup').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    loadData();
+  } catch(e) {
+    err.textContent='No se pudo conectar.';
+    err.style.display='block';
+    btn.disabled=false; btn.textContent='Conectar tablero →';
+  }
+}
+
+function resetConfig() { localStorage.clear(); location.reload(); }
+
+// ── Load ──────────────────────────────────────────────────────────────────────
+async function loadData() {
+  debugLog=[];
+  try {
+    const [lists,fields,cards]=await Promise.all([
+      api(`/boards/${BOARD_ID}/lists?`),
+      api(`/boards/${BOARD_ID}/customFields?`),
+      api(`/boards/${BOARD_ID}/cards?customFieldItems=true&fields=name,idList,dateLastActivity,shortUrl&`)
+    ]);
+    allLists=lists; fieldDefs=fields;
+    log(`✓ ${lists.length} listas, ${fields.length} campos, ${cards.length} tarjetas`);
+
+    allCards=cards.map(c=>{
+      const map=buildFieldMap(c.customFieldItems);
+      const skus=extractSKUs(map);
+      const listName=(lists.find(l=>l.id===c.idList)||{}).name||'Sin lista';
+      const ln=listName.toLowerCase();
+      const tiempoCompletado=(ln.includes('complet')||ln.includes('despacha'))
+        ?Math.max(0,Math.floor((new Date(c.dateLastActivity).getTime()-parseInt(c.id.substring(0,8),16)*1000)/86400000))
+        :null;
+      return {
+        ...c,
+        listName,
+        diasCreacion:diasDesdeCreacion(c.id),
+        tiempoCompletado,
+        map, skus,
+        hasFalt:requiresCompra(skus),
+        customVal:getField(map,'Customización','Customizacion'),
+        vendedor: getField(map,'Vendedor'),
+        nOrden:   getField(map,'Numero de Orden','Número de Orden'),
+        pago:        getField(map,'Pago'),
+        entrega:     getField(map,'Entrega'),
+        facturacion: getField(map,'Facturación','Facturacion'),
+        cobro:       getField(map,'Cobro'),
+      };
+    });
+
+    checkNewConfirmed(allCards);
+    document.getElementById('lastUpdate').textContent=new Date().toLocaleTimeString('es-AR');
+    render();
+  } catch(e) {
+    log(`ERROR: ${e.message}`);
+  
+  document.getElementById('mainContent').innerHTML=`<div class="loading"><span style="color:var(--danger)">Error al cargar. Activá 🔍 Debug.</span></div>`;
+  }
+}
+
+// ── KPI toggle ────────────────────────────────────────────────────────────────
+function getCustomStatus(customVal) {
+  if (!customVal) return 'otro';
+  const v = customVal.toLowerCase();
+  if (v.includes('falta') || v.includes('mp') || v.includes('materia')) return 'falta-mp';
+  if (v.includes('diseño') || v.includes('diseno') || v.includes('esperando')) return 'esperando-diseno';
+  if (v.includes('proceso') || v.includes('taller') || v.includes('bordado') || v.includes('estampado')) return 'en-proceso';
+  if (v.includes('listo') || v.includes('terminado') || v.includes('complet')) return 'terminado';
+  return 'otro';
+}
+
+const customStatusConfig = {
+  'falta-mp':        { label: 'Falta MP',          color: 'var(--danger)',  icon: '🔴' },
+  'esperando-diseno':{ label: 'Esperando diseño',   color: 'var(--accent2)', icon: '🟡' },
+  'en-proceso':      { label: 'En proceso',          color: 'var(--accent)',  icon: '🔵' },
+  'terminado':       { label: 'Terminado',           color: 'var(--success)', icon: '🟢' },
+  'otro':            { label: 'Sin estado definido', color: 'var(--muted)',   icon: '⚪' },
+};
+
+function toggleKpiConfirmados() {
+  const panel = document.getElementById('kpi-expand');
+  const kpiEl = document.getElementById('kpi-confirmados');
+  document.querySelectorAll('.kpi').forEach(k=>k.classList.remove('active'));
+
+  if (activeKpi === 'confirmados') { activeKpi = null; panel.classList.remove('open'); return; }
+  activeKpi = 'confirmados';
+  kpiEl.classList.add('active');
+
+  const confirmados = allCards.filter(c => c.listName.toLowerCase().includes('confirmad'));
+
+  if (!confirmados.length) {
+    panel.querySelector('.expand-panel-inner').innerHTML = '<div class="empty">Sin pedidos confirmados</div>';
+    panel.classList.add('open');
+    return;
+  }
+
+  const html = confirmados.map(c => {
+    const d = c.diasCreacion || 0;
+    let timeColor = 'var(--success)'; let timeIcon = '🟢';
+    if (d >= 20) { timeColor = 'var(--danger)'; timeIcon = '🔴'; }
+    else if (d >= 10) { timeColor = 'var(--accent2)'; timeIcon = '🟡'; }
+    const hasFalt = c.hasFalt ? `<span style="font-size:0.68rem;background:#fee2e2;border:1px solid #fecaca;color:#b91c1c;border-radius:4px;padding:1px 6px;font-family:var(--mono)">falta SKU</span>` : '';
+    const cobro = c.cobro ? `<span style="font-size:0.68rem;color:var(--muted)"> · ${c.cobro}</span>` : '';
+    return `
+    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid var(--border)">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:0.83rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">${c.vendedor?'👤 '+c.vendedor:''}${cobro} ${hasFalt}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0">
+        <div style="font-family:var(--mono);font-size:0.78rem;font-weight:700;color:${timeColor}">${timeIcon} ${d}d</div>
+        <div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted)">en tablero</div>
+      </div>
+      <a href="${c.shortUrl}" target="_blank" class="trello-link">→</a>
+    </div>`;
+  }).join('');
+
+  panel.querySelector('.expand-panel-inner').innerHTML = html;
+  panel.classList.add('open');
+}
+
+function toggleKpiCustom() {
+  const panel = document.getElementById('kpi-expand');
+  const kpiEl = document.getElementById('kpi-custom');
+  document.querySelectorAll('.kpi').forEach(k=>k.classList.remove('active'));
+
+  if (activeKpi === 'custom') { activeKpi = null; panel.classList.remove('open'); return; }
+  activeKpi = 'custom';
+  kpiEl.classList.add('active');
+
+  const customCards = allCards.filter(c => c.customVal && !c.customVal.toLowerCase().includes('no requiere'));
+
+  // Group by status
+  const groups = {};
+  customCards.forEach(c => {
+    const st = getCustomStatus(c.customVal);
+    if (!groups[st]) groups[st] = [];
+    groups[st].push(c);
+  });
+
+  const order = ['falta-mp','esperando-diseno','en-proceso','terminado','otro'];
+  let html = '';
+
+  order.forEach(st => {
+    if (!groups[st] || !groups[st].length) return;
+    const cfg = customStatusConfig[st];
+    html += `<div style="margin-bottom:0.75rem">
+      <div style="font-family:var(--mono);font-size:0.68rem;text-transform:uppercase;letter-spacing:0.07em;color:${cfg.color};margin-bottom:0.4rem;padding:0.3rem 0;border-bottom:1px solid var(--border)">${cfg.icon} ${cfg.label} — ${groups[st].length} pedido${groups[st].length>1?'s':''}</div>
+      ${groups[st].map(c=>{
+        const d = c.diasCreacion || 0;
+        // Color for time in this custom status — same thresholds
+        let timeColor = 'var(--green)'; let timeIcon = '🟢';
+        if (d >= 20) { timeColor = 'var(--red)'; timeIcon = '🔴'; }
+        else if (d >= 10) { timeColor = 'var(--yellow)'; timeIcon = '🟡'; }
+        return `
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid var(--border)">
+          <div style="flex:1;min-width:0">
+            <div style="font-size:0.83rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+            <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">${c.customVal}${c.vendedor?' · 👤 '+c.vendedor:''}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-family:var(--mono);font-size:0.78rem;font-weight:700;color:${timeColor}">${timeIcon} ${d}d</div>
+            <div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted)">en tablero</div>
+          </div>
+          <a href="${c.shortUrl}" target="_blank" class="trello-link">→</a>
+        </div>`;}).join('')}
+    </div>`;
+  });
+
+  if (!html) html = '<div class="empty">Sin pedidos con customización</div>';
+  panel.querySelector('.expand-panel-inner').innerHTML = html;
+  panel.classList.add('open');
+}
+
+function toggleKpiTiempo() {
+  const panel=document.getElementById('kpi-expand');
+  const kpiEl=document.getElementById('kpi-tiempo');
+  document.querySelectorAll('.kpi').forEach(k=>k.classList.remove('active'));
+  if (activeKpi==='tiempo') { activeKpi=null; panel.classList.remove('open'); return; }
+  activeKpi='tiempo';
+  kpiEl.classList.add('active');
+  const sorted=allCards
+    .filter(c=>c.tiempoCompletado!==null&&c.tiempoCompletado>=0)
+    .sort((a,b)=>b.tiempoCompletado-a.tiempoCompletado);
+  if (!sorted.length) {
+    panel.querySelector('.expand-panel-inner').innerHTML='<div class="empty">Sin pedidos completados aún</div>';
+  } else {
+    const rows=sorted.map(c=>{
+      const t=c.tiempoCompletado;
+      let tColor='var(--green)'; let tIcon='🟢';
+      if (t>=20) { tColor='var(--red)'; tIcon='🔴'; }
+      else if (t>=10) { tColor='var(--yellow)'; tIcon='🟡'; }
+      return `<div style="display:flex;align-items:center;gap:0.75rem;padding:0.5rem 0;border-bottom:1px solid var(--border)">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:0.83rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${c.name}</div>
+          <div style="font-size:0.72rem;color:var(--muted);margin-top:2px">${statusPill(c.listName)}${c.vendedor?' · 👤 '+c.vendedor:''}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-family:var(--mono);font-size:0.78rem;font-weight:700;color:${tColor}">${tIcon} ${t}d</div>
+          <div style="font-family:var(--mono);font-size:0.65rem;color:var(--muted)">creación → cierre</div>
+        </div>
+        <a href="${c.shortUrl}" target="_blank" class="trello-link">→</a>
+      </div>`;
+    }).join('');
+    panel.querySelector('.expand-panel-inner').innerHTML=`
+      <div style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.06em">${sorted.length} pedidos completados/despachados</div>
+      ${rows}`;
+  }
+  panel.classList.add('open');
+}
+
+function toggleKpi(kpiId, cardsSubset) {
+  const panel=document.getElementById('kpi-expand');
+  const kpiEl=document.getElementById('kpi-'+kpiId);
+
+  // Deselect all kpis
+  document.querySelectorAll('.kpi').forEach(k=>k.classList.remove('active'));
+
+  if (activeKpi===kpiId) {
+    activeKpi=null;
+    panel.classList.remove('open');
+    return;
+  }
+  activeKpi=kpiId;
+  kpiEl.classList.add('active');
+
+  if (!cardsSubset.length) {
+    panel.querySelector('.expand-panel-inner').innerHTML='<div class="empty">Sin pedidos en este grupo</div>';
+  } else {
+    panel.querySelector('.expand-panel-inner').innerHTML=`
+      <div style="font-family:var(--mono);font-size:0.7rem;color:var(--muted);margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.06em">${cardsSubset.length} pedidos</div>
+      ${miniPedidoRows(cardsSubset)}`;
+  }
+  panel.classList.add('open');
+}
+
+// ── Cliente toggle ────────────────────────────────────────────────────────────
+function toggleCliente(nombre) {
+  const safeId = nombre.replace(/[^a-z0-9]/gi,'_');
+  const expandEl = document.getElementById('cexp-'+safeId);
+  const arrowEl  = document.getElementById('carr-'+safeId);
+  if (!expandEl) return;
+
+  const isOpen = expandEl.classList.contains('open');
+
+  // Close all
+  document.querySelectorAll('.cliente-expand').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('[id^="carr-"]').forEach(a=>a.style.transform='');
+
+  if (!isOpen) {
+    expandEl.classList.add('open');
+    if (arrowEl) arrowEl.style.transform = 'rotate(90deg)';
+  }
+}
+
+// ── Pedido row toggle ─────────────────────────────────────────────────────────
+function togglePedidoRow(cardId) {
+  const detailRow=document.getElementById('detail-'+cardId);
+  const mainRow=document.getElementById('row-'+cardId);
+  if (!detailRow) return;
+  const isOpen=detailRow.style.display==='table-row';
+  // Close all
+  document.querySelectorAll('.detail-row').forEach(r=>r.style.display='none');
+  document.querySelectorAll('tr[id^="row-"]').forEach(r=>r.classList.remove('active-row'));
+  if (!isOpen) {
+    detailRow.style.display='table-row';
+    mainRow.classList.add('active-row');
+  }
+}
+
+// ── Ranking toggle ────────────────────────────────────────────────────────────
+function toggleRanking(cardId) {
+  const expandEl=document.getElementById('rexp-'+cardId);
+  const rowEl=document.getElementById('rrow-'+cardId);
+  if (!expandEl) return;
+  const isOpen=expandEl.classList.contains('open');
+  document.querySelectorAll('.ranking-expand').forEach(e=>e.classList.remove('open'));
+  document.querySelectorAll('.ranking-row').forEach(r=>r.classList.remove('active'));
+  if (!isOpen) {
+    expandEl.classList.add('open');
+    rowEl.classList.add('active');
+  }
+}
+
+// ── SKU sub toggle ────────────────────────────────────────────────────────────
+function toggleSkuSub(subId) {
+  const expandEl=document.getElementById('skusub-'+subId);
+  const rowEl=document.getElementById('skurow-'+subId);
+  if (!expandEl) return;
+  const isOpen=expandEl.classList.contains('open');
+  expandEl.classList.toggle('open',!isOpen);
+  rowEl.classList.toggle('active',!isOpen);
+}
+
+// ── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(function(t){ if((t.dataset.tab||'')===tab) t.classList.add('active'); });
+  const tc=document.getElementById('tab-'+tab);
+  if(tc) tc.classList.add('active');
+  if(tab==='deposito'){ const q=document.getElementById('deposito-search'); renderDeposito(q?q.value:''); }
+}
+
+function filterDeposito(val) {
+  const clearBtn = document.getElementById('deposito-clear');
+  const info = document.getElementById('deposito-match-info');
+  if (clearBtn) clearBtn.style.display = val ? 'inline-block' : 'none';
+  renderDeposito(val.trim());
+}
+
+function clearDepositoSearch() {
+  const input = document.getElementById('deposito-search');
+  if (input) input.value = '';
+  const clearBtn = document.getElementById('deposito-clear');
+  if (clearBtn) clearBtn.style.display = 'none';
+  const info = document.getElementById('deposito-match-info');
+  if (info) info.textContent = '';
+  renderDeposito('');
+}
+
+function matchesSku(skuStr, query) {
+  if (!query) return true;
+  const q = query.toLowerCase().replace(/-/g, '');
+  const s = skuStr.toLowerCase().replace(/-/g, '');
+  // Also match individual parts
+  const p = parseSKU(skuStr);
+  return s.includes(q) ||
+    p.codigo.toLowerCase().includes(q) ||
+    p.color.toLowerCase().includes(q) ||
+    p.talle.toLowerCase().includes(q);
+}
+
+function renderDeposito(skuFilter) {
+  skuFilter = (skuFilter || '').trim();
+  const container = document.getElementById('deposito-content');
+  if (!container) return;
+
+  // Base: pedidos en proceso con incompletos
+  let enProceso = allCards.filter(c => {
+    if (!c.listName.toLowerCase().includes('proceso')) return false;
+    return c.skus.some(s => s.sku && (s.status||'').toLowerCase() !== 'completado');
+  });
+
+  // Apply SKU filter: only cards that have a matching pending SKU
+  if (skuFilter) {
+    enProceso = enProceso.filter(c =>
+      c.skus.some(s => s.sku &&
+        (s.status||'').toLowerCase() !== 'completado' &&
+        matchesSku(s.sku, skuFilter))
+    );
+  }
+
+  // Update match info
+  const infoEl = document.getElementById('deposito-match-info');
+  if (infoEl) {
+    infoEl.textContent = skuFilter
+      ? (enProceso.length > 0 ? enProceso.length + ' pedido' + (enProceso.length > 1 ? 's' : '') + ' requieren este SKU' : 'Ningún pedido requiere este SKU')
+      : '';
+    infoEl.style.color = skuFilter && enProceso.length === 0 ? '#16a34a' : 'var(--muted)';
+  }
+
+  if (!enProceso.length) {
+    container.innerHTML = skuFilter
+      ? '<div class="deposito-empty">✓ Ningún pedido en proceso requiere este SKU</div>'
+      : '<div class="deposito-empty">✓ No hay pedidos en proceso con faltantes</div>';
+    return;
+  }
+
+  enProceso.sort((a,b) => (b.diasCreacion||0) - (a.diasCreacion||0));
+
+  container.innerHTML = '<div class="deposito-grid">' +
+    enProceso.map(c => {
+      const pendingSkus = skuFilter
+        ? c.skus.filter(s => s.sku && (s.status||'').toLowerCase() !== 'completado' && matchesSku(s.sku, skuFilter))
+        : c.skus.filter(s => s.sku && (s.status||'').toLowerCase() !== 'completado');
+      const sinPedir = pendingSkus.filter(s => !s.status || s.status.toLowerCase().includes('sin'));
+      const pedido   = pendingSkus.filter(s => (s.status||'').toLowerCase().includes('pedido'));
+
+      const skuRows = pendingSkus.map(s => {
+        const p = parseSKU(s.sku);
+        const info = getCatalog(p.codigo);
+        const isPedido = (s.status||'').toLowerCase().includes('pedido');
+        return '<div class="deposito-sku-row">' +
+          '<span class="deposito-sku-code">' + p.codigo + '</span>' +
+          '<div class="deposito-sku-info">' +
+            (info ? '<div class="deposito-sku-desc">' + info.desc + '</div>' : '') +
+            '<div class="deposito-sku-detail">' +
+              '<span class="deposito-qty">× ' + (s.qty||'?') + '</span>' +
+              '<span class="deposito-color">' + p.color + '</span>' +
+              '<span class="deposito-talle">T' + p.talle + '</span>' +
+              (isPedido
+                ? '<span style="font-size:0.68rem;background:#fef3c7;border:1px solid #fde68a;color:#b45309;border-radius:4px;padding:1px 5px;font-family:var(--mono)">pedido</span>'
+                : '<span style="font-size:0.68rem;background:#fee2e2;border:1px solid #fecaca;color:#b91c1c;border-radius:4px;padding:1px 5px;font-family:var(--mono)">sin pedir</span>') +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+
+      const badges = [
+        sinPedir.length ? '<span style="font-size:0.68rem;background:#fee2e2;border:1px solid #fecaca;color:#b91c1c;border-radius:4px;padding:1px 6px;font-family:var(--mono)">' + sinPedir.length + ' sin pedir</span>' : '',
+        pedido.length   ? '<span style="font-size:0.68rem;background:#fef3c7;border:1px solid #fde68a;color:#b45309;border-radius:4px;padding:1px 6px;font-family:var(--mono)">' + pedido.length + ' pedido</span>' : '',
+      ].filter(Boolean).join(' ');
+
+      return '<div class="deposito-card">' +
+        '<div class="deposito-card-header">' +
+          '<div style="flex:1;min-width:0">' +
+            '<div class="deposito-card-name">' + c.name + '</div>' +
+            '<div class="deposito-card-meta">' + (c.vendedor ? '👤 ' + c.vendedor + ' · ' : '') + diasChip(c.diasCreacion) + ' ' + badges + '</div>' +
+          '</div>' +
+          '<a href="' + c.shortUrl + '" target="_blank" class="trello-link" style="flex-shrink:0;margin-left:0.75rem">Abrir →</a>' +
+        '</div>' +
+        '<div class="deposito-card-body">' + skuRows + '</div>' +
+      '</div>';
+    }).join('') + '</div>';
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function handleSearch(val){render(val);setTimeout(function(){var el=document.getElementById('fText');if(el){el.focus();el.setSelectionRange(val.length,val.length);}},0);}
+function clearSearch(){render('');setTimeout(function(){var el=document.getElementById('fText');if(el)el.value='';},0);}
+function render(filter='') {
+  const cards=filter ? allCards.filter(c=>{
+    const q=filter.toLowerCase();
+    return c.name.toLowerCase().includes(q) || c.name.split(' - ')[0].toLowerCase().includes(q);
+  }) : allCards;
+
+  const total      =cards.length;
+  const enProceso  =cards.filter(c=>c.listName.toLowerCase().includes('proceso'));
+  const confirmadosC=cards.filter(c=>c.listName.toLowerCase().includes('confirmad'));
+  const sinPedirC  =cards.filter(c=>c.hasFalt);
+  const conCustomC =cards.filter(c=>c.customVal&&!c.customVal.toLowerCase().includes('no requiere'));
+  const completadosC=cards.filter(c=>c.listName.toLowerCase().includes('complet'));
+  const completedWithTime=allCards.filter(c=>c.tiempoCompletado!==null&&c.tiempoCompletado>=0);
+  const promTiempoCompletado=completedWithTime.length>0
+    ?Math.round(completedWithTime.reduce((s,c)=>s+c.tiempoCompletado,0)/completedWithTime.length)
+    :null;
+
+  // KPIs
+  const tiempoColor=promTiempoCompletado===null?'var(--muted)':promTiempoCompletado<10?'var(--success)':promTiempoCompletado<=20?'var(--accent2)':'var(--danger)';
+  const kpis=`
+    <div class="kpi-grid">
+      <div class="kpi" id="kpi-tiempo" style="--kpi-color:${tiempoColor}" onclick="toggleKpiTiempo()">
+        <div class="kpi-label">Tiempo promedio a completado</div>
+        <div class="kpi-value" style="color:${tiempoColor}">${promTiempoCompletado!==null?promTiempoCompletado+'<span style="font-size:1.2rem;font-weight:600"> días</span>':'—'}</div>
+        <div class="kpi-sub">${completedWithTime.length} pedidos completados/despachados · días desde creación hasta cierre</div>
+        <div class="click-hint">ver detalle</div>
+      </div>
+      <div class="kpi" id="kpi-confirmados" style="--kpi-color:var(--accent)" onclick="toggleKpiConfirmados()">
+        <div class="kpi-label">Pedidos confirmados</div><div class="kpi-value">${confirmadosC.length}</div><div class="kpi-sub">requieren armado</div>
+        <div class="click-hint">ver pedidos</div>
+      </div>
+      <div class="kpi" id="kpi-proceso" style="--kpi-color:var(--accent2)" onclick="toggleKpi('proceso', allCards.filter(c=>c.listName.toLowerCase().includes('proceso')))">
+        <div class="kpi-label">En proceso</div><div class="kpi-value">${enProceso.length}</div><div class="kpi-sub">armándose</div>
+        <div class="click-hint">ver pedidos</div>
+      </div>
+      <div class="kpi" id="kpi-compra" style="--kpi-color:var(--danger)" onclick="toggleKpi('compra', allCards.filter(c=>c.hasFalt))">
+        <div class="kpi-label">Requieren compra</div><div class="kpi-value">${sinPedirC.length}</div><div class="kpi-sub">con SKU sin pedir</div>
+        <div class="click-hint">ver pedidos</div>
+      </div>
+      <div class="kpi" id="kpi-custom" style="--kpi-color:var(--purple)" onclick="toggleKpiCustom()">
+        <div class="kpi-label">Customización</div><div class="kpi-value">${conCustomC.length}</div><div class="kpi-sub">con bordado/logo</div>
+        <div class="click-hint">ver estado</div>
+      </div>
+      <div class="kpi" id="kpi-desp" style="--kpi-color:var(--success)" onclick="toggleKpi('desp', allCards.filter(c=>c.listName.toLowerCase().includes('complet')))">
+        <div class="kpi-label">Completados</div><div class="kpi-value">${completadosC.length}</div><div class="kpi-sub">listos para despachar</div>
+        <div class="click-hint">ver pedidos</div>
+      </div>
+    </div>
+    <div class="expand-panel" id="kpi-expand"><div class="expand-panel-inner"></div></div>`;
+
+  // Estado bars
+  const estadoCounts={};
+  allLists.forEach(l=>{ estadoCounts[l.name]=0; });
+  cards.forEach(c=>{ if (estadoCounts[c.listName]!==undefined) estadoCounts[c.listName]++; });
+  const maxCount=Math.max(...Object.values(estadoCounts),1);
+  const estadoBars=Object.entries(estadoCounts).map(([name,count])=>`
+    <div class="estado-row">
+      <span class="estado-name">${name}</span>
+      <div class="estado-bar-wrap"><div class="estado-bar" style="width:${(count/maxCount)*100}%; background:${listColor(name)}"></div></div>
+      <span class="estado-count">${count}</span>
+    </div>`).join('');
+
+  // Ranking
+  // Extra KPIs para panel de estado
+  const enProcesoCards = cards.filter(c=>c.listName.toLowerCase().includes('proceso'));
+  const promDiasEnProceso = enProcesoCards.length > 0
+    ? Math.round(enProcesoCards.reduce((s,c)=>s+(c.diasCreacion||0),0)/enProcesoCards.length)
+    : 0;
+  const activosNoDespachados = cards.filter(c=>!c.listName.toLowerCase().includes('despacha'));
+  const maxDias = activosNoDespachados.length > 0
+    ? Math.max(...activosNoDespachados.map(c=>c.diasCreacion||0))
+    : 0;
+  let totalSkusSinPedir = 0, totalSkusPedido = 0;
+  cards.forEach(c=>{ c.skus.forEach(s=>{ if (!s.sku) return; const st=(s.status||'').toLowerCase(); if (!st||st.includes('sin')) totalSkusSinPedir+=parseFloat(s.qty)||1; else if (st.includes('pedido')) totalSkusPedido+=parseFloat(s.qty)||1; }); });
+  const customPendiente = cards.filter(c=>c.customVal&&!c.customVal.toLowerCase().includes('no requiere')&&!c.customVal.toLowerCase().includes('listo')).length;
+  const criticos = activosNoDespachados.filter(c=>(c.diasCreacion||0)>20).length;
+
+  const rankingCards=[...cards].filter(c=>!c.listName.toLowerCase().includes('despacha')).sort((a,b)=>(b.diasCreacion||0)-(a.diasCreacion||0)).slice(0,10);
+  const rankingHTML=rankingCards.length===0
+    ?'<div class="empty">Sin pedidos activos</div>'
+    :rankingCards.map((c,i)=>`
+      <div class="ranking-row" style="cursor:default">
+        <div class="ranking-info">
+          <div class="ranking-name">${c.name}</div>
+          <div class="ranking-meta">${statusPill(c.listName)}${c.vendedor?` · 👤 ${c.vendedor}`:''}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.6rem;flex-shrink:0">
+          ${diasChip(c.diasCreacion)}
+          <a href="${c.shortUrl}" target="_blank" class="trello-link" style="font-size:0.75rem">Abrir →</a>
+        </div>
+      </div>`).join('');
+
+  // Faltantes por pedido
+  const faltCards=cards.filter(c=>c.hasFalt);
+  let faltHTML='<div class="empty">✓ Sin SKUs pendientes de compra</div>';
+  if (faltCards.length>0) {
+    let rows='';
+    faltCards.forEach(c=>{
+      const sinPedirSkus=c.skus.filter(s=>s.sku&&(!s.status||(s.status||'').toLowerCase().includes('sin')));
+      if (!sinPedirSkus.length) return;
+      sinPedirSkus.forEach((s,i)=>{
+        const p=parseSKU(s.sku);
+        rows+=`<tr class="${i===0?'group-first':''}">
+          ${i===0?`<td class="group-cell td-name" rowspan="${sinPedirSkus.length}">
+            ${c.name}
+            ${c.vendedor?`<small>👤 ${c.vendedor}</small>`:''}
+            <small style="margin-top:4px;display:block">${diasChip(c.diasCreacion)}</small>
+          </td>`:''}
+          <td>
+            <span class="mono-val">${p.codigo}</span>
+          </td>
+          <td><span class="mono-val">${p.color}</span></td>
+          <td><span class="mono-val">${p.talle}</span></td>
+          <td><strong style="font-family:var(--mono)">${s.qty||'—'}</strong></td>
+          <td>
+            <span class="sku-tag sku-sin-pedir">Sin pedir</span>
+          </td>
+          ${i===0?`<td rowspan="${sinPedirSkus.length}"><a href="${c.shortUrl}" target="_blank" class="trello-link">Abrir →</a></td>`:''}
+        </tr>`;
+      });
+    });
+    faltHTML=`<div class="table-wrap"><table>
+      <thead><tr><th>Pedido</th><th>Código</th><th>Color</th><th>Talle</th><th>Cantidad</th><th>Status</th><th></th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+  }
+
+  // SKU resumen por Proveedor → Artículo → Variante
+  const provMap={};
+  cards.forEach(c=>{
+    c.skus.forEach(s=>{
+      if(!s.sku) return;
+      const st=(s.status||'').toLowerCase();
+      if(!(!st||st.includes('sin'))) return;
+      const p=parseSKU(s.sku);
+      const info=getCatalog(p.codigo);
+      const codKey=CODIGO_ALIAS[p.codigo.toUpperCase()]||p.codigo;
+      const infoKey=getCatalog(codKey)||info;
+      const descKey=ALIAS_DESC[codKey]||(infoKey?infoKey.desc:'');
+      const provList=info&&info.proveedores&&info.proveedores.length?info.proveedores:(infoKey&&infoKey.proveedores&&infoKey.proveedores.length?infoKey.proveedores:['Sin proveedor']);
+      provList.forEach(function(prov){
+        if(!provMap[prov]) provMap[prov]={nombre:prov,total:0,arts:{}};
+        if(!provMap[prov].arts[codKey]) provMap[prov].arts[codKey]={codigo:codKey,desc:descKey,total:0,subs:{}};
+        const sk=p.color+'|'+p.talle;
+        if(!provMap[prov].arts[codKey].subs[sk]) provMap[prov].arts[codKey].subs[sk]={color:p.color,talle:p.talle,total:0,pedidos:[]};
+        const qty=parseFloat(s.qty)||1;
+        provMap[prov].total+=qty; provMap[prov].arts[codKey].total+=qty;
+        provMap[prov].arts[codKey].subs[sk].total+=qty;
+        provMap[prov].arts[codKey].subs[sk].pedidos.push({card:c,qty:s.qty});
+      });
+    });
+  });
+  const skuMap={};
+  cards.forEach(c=>{ c.skus.forEach(s=>{ if(!s.sku) return; const st=(s.status||'').toLowerCase(); if(!st||st.includes('sin')) skuMap[s.sku]=true; }); });
+
+  // Resumen TODOS los SKUs (todos los estados) por proveedor
+  const provMapAll={};
+  cards.forEach(c=>{
+    c.skus.forEach(s=>{
+      if(!s.sku) return;
+      const p=parseSKU(s.sku);
+      const info=getCatalog(p.codigo);
+      const codKey=CODIGO_ALIAS[p.codigo.toUpperCase()]||p.codigo;
+      const infoKey=getCatalog(codKey)||info;
+      const descKey=ALIAS_DESC[codKey]||(infoKey?infoKey.desc:'');
+      const provList=info&&info.proveedores&&info.proveedores.length?info.proveedores:(infoKey&&infoKey.proveedores&&infoKey.proveedores.length?infoKey.proveedores:['Sin proveedor']);
+      provList.forEach(function(prov){
+        if(!provMapAll[prov]) provMapAll[prov]={nombre:prov,total:0,arts:{}};
+        if(!provMapAll[prov].arts[codKey]) provMapAll[prov].arts[codKey]={codigo:codKey,desc:descKey,total:0,subs:{}};
+        const sk=p.color+'|'+p.talle;
+        if(!provMapAll[prov].arts[codKey].subs[sk]) provMapAll[prov].arts[codKey].subs[sk]={color:p.color,talle:p.talle,total:0,sinPedir:0,pedido:0,completado:0,pedidos:[]};
+        const qty=parseFloat(s.qty)||1;
+        const st=(s.status||'').toLowerCase();
+        provMapAll[prov].total+=qty;
+        provMapAll[prov].arts[codKey].total+=qty;
+        provMapAll[prov].arts[codKey].subs[sk].total+=qty;
+        if(!st||st.includes('sin')) provMapAll[prov].arts[codKey].subs[sk].sinPedir+=qty;
+        else if(st.includes('pedido')) provMapAll[prov].arts[codKey].subs[sk].pedido+=qty;
+        else if(st.includes('complet')||st.includes('listo')) provMapAll[prov].arts[codKey].subs[sk].completado+=qty;
+        provMapAll[prov].arts[codKey].subs[sk].pedidos.push({card:c,qty:s.qty,status:s.status});
+      });
+    });
+  });
+
+  // ABC análisis — Artículos (provMapAll)
+  const provAllABC={};
+  (function(){var list=Object.values(provMapAll).sort(function(a,b){return b.total-a.total;});var grand=list.reduce(function(s,p){return s+p.total;},0);var cum=0;list.forEach(function(p){var pct=grand?p.total/grand*100:0;cum+=pct;provAllABC[p.nombre]={abc:cum<=80?'A':cum<=95?'B':'C',pct:pct,cum:cum};});}());
+  const artAllABC={};
+  (function(){var m={};Object.values(provMapAll).forEach(function(p){Object.values(p.arts).forEach(function(a){if(!m[a.codigo])m[a.codigo]=0;m[a.codigo]+=a.total;});});var list=Object.entries(m).sort(function(a,b){return b[1]-a[1];});var grand=list.reduce(function(s,e){return s+e[1];},0);var cum=0;list.forEach(function(e){var pct=grand?e[1]/grand*100:0;cum+=pct;artAllABC[e[0]]={abc:cum<=80?'A':cum<=95?'B':'C',pct:pct,cum:cum};});}());
+  const subAllABC={};
+  (function(){var m={};Object.values(provMapAll).forEach(function(p){Object.values(p.arts).forEach(function(a){Object.entries(a.subs).forEach(function(e){var color=e[0].split('|')[0];var key=p.nombre+'|'+a.codigo+'|'+color;if(!m[key])m[key]=0;m[key]+=e[1].total;});});});var list=Object.entries(m).sort(function(a,b){return b[1]-a[1];});var grand=list.reduce(function(s,e){return s+e[1];},0);var cum=0;list.forEach(function(e){var pct=grand?e[1]/grand*100:0;cum+=pct;subAllABC[e[0]]={abc:cum<=80?'A':cum<=95?'B':'C',pct:pct,cum:cum};});}());
+
+  let skuTodosHTML='<div class="empty">Sin SKUs registrados</div>';
+  if(Object.keys(provMapAll).length){
+    let piAll=0;
+    skuTodosHTML=Object.values(provMapAll).sort(function(a,b){return b.total-a.total;}).map(function(prov){
+      const pi=piAll++;
+      let aiAll=0;
+      const artRows=Object.values(prov.arts).sort(function(a,b){return b.total-a.total;}).map(function(art){
+        const ai=aiAll++;
+        const artId='all_art_'+pi+'_'+ai;
+        let siAll=0;
+        const subRows=Object.values(art.subs).sort(function(a,b){return b.total-a.total;}).map(function(d){
+          const si=siAll++;
+          const subId='all_sub_'+pi+'_'+ai+'_'+si;
+          const badges=[
+            d.sinPedir?'<span style="font-size:.68rem;background:#fee2e2;border:1px solid #fecaca;color:#b91c1c;border-radius:4px;padding:1px 6px;font-family:var(--mono)">'+d.sinPedir+' sin pedir</span>':'',
+            d.pedido?'<span style="font-size:.68rem;background:#fef3c7;border:1px solid #fde68a;color:#b45309;border-radius:4px;padding:1px 6px;font-family:var(--mono)">'+d.pedido+' pedido</span>':'',
+            d.completado?'<span style="font-size:.68rem;background:#dcfce7;border:1px solid #bbf7d0;color:#15803d;border-radius:4px;padding:1px 6px;font-family:var(--mono)">'+d.completado+' complet.</span>':'',
+          ].filter(Boolean).join(' ');
+          const pedItems=d.pedidos.map(function(x){
+            const st2=(x.status||'').toLowerCase();
+            let stBadge='<span style="font-size:.65rem;background:#fee2e2;color:#b91c1c;border-radius:4px;padding:1px 5px;font-family:var(--mono)">sin pedir</span>';
+            if(st2.includes('pedido')) stBadge='<span style="font-size:.65rem;background:#fef3c7;color:#b45309;border-radius:4px;padding:1px 5px;font-family:var(--mono)">pedido</span>';
+            else if(st2.includes('complet')||st2.includes('listo')) stBadge='<span style="font-size:.65rem;background:#dcfce7;color:#15803d;border-radius:4px;padding:1px 5px;font-family:var(--mono)">completado</span>';
+            return '<div class="sku-pedido-item"><div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+x.card.name+'</div><div style="font-size:.72rem;color:var(--muted);display:flex;gap:.4rem;align-items:center">'+statusPill(x.card.listName)+' '+stBadge+'</div></div><span style="font-family:var(--mono);font-size:.78rem">'+(x.qty||'?')+' un.</span><a href="'+x.card.shortUrl+'" target="_blank" class="trello-link">→</a></div>';
+          }).join('');
+          const _sA1=subAllABC[prov.nombre+'|'+art.codigo+'|'+d.color]||{abc:'C',pct:0,cum:100};
+          return '<div class="sku-sub-row" id="skurow-'+subId+'" data-sid="'+subId+'" onclick="toggleSkuSubById(this)" style="padding-left:4rem">'+
+            '<div><span class="sku-sub-label">Color</span><span class="mono-val">'+d.color+'</span></div>'+
+            '<div><span class="sku-sub-label">Talle</span><span class="mono-val">'+d.talle+'</span></div>'+
+            '<div>'+badges+' '+abcBadge(_sA1.abc,_sA1.pct,_sA1.cum)+'</div>'+
+            '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:right">'+d.pedidos.length+' ped. ▶</div></div>'+
+            '<div class="sku-pedidos-expand" id="skusub-'+subId+'"><div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">Pedidos</div>'+pedItems+'</div>';
+        }).join('');
+        const _aA1=artAllABC[art.codigo]||{abc:'C',pct:0,cum:100};
+        return '<div class="sku-group" id="'+artId+'">'+
+          '<div class="sku-group-header" data-gid="'+artId+'" onclick="toggleGroupById(this)" style="padding-left:2.5rem;background:#fafaf9">'+
+            '<div style="flex:1;min-width:0">'+
+              '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'+
+                '<span style="font-family:var(--mono);font-size:.82rem;font-weight:600">'+art.codigo+'</span>'+
+                '<span style="font-family:var(--mono);font-size:.75rem;font-weight:700;color:#0369a1">'+art.total+' un.</span>'+
+                abcBadge(_aA1.abc,_aA1.pct,_aA1.cum)+
+              '</div>'+
+              (art.desc?'<div style="font-size:.72rem;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+art.desc+'</div>':'')+
+            '</div>'+
+            '<span class="sku-group-arrow">▶</span>'+
+          '</div>'+
+          '<div class="sku-group-rows">'+subRows+'</div></div>';
+      }).join('');
+      const provId='all_prov_'+pi;
+      const _pA1=provAllABC[prov.nombre]||{abc:'C',pct:0,cum:100};
+      return '<div class="sku-group" id="'+provId+'">'+
+        '<div class="sku-group-header" data-gid="'+provId+'" onclick="toggleGroupById(this)">'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">'+
+              '<span class="sku-group-code" style="color:#0369a1">'+prov.nombre+'</span>'+
+              '<span class="sku-group-total" style="color:#0369a1">'+prov.total+' un.</span>'+
+              '<span style="color:var(--muted);font-size:.72rem;font-family:var(--mono)">'+Object.keys(prov.arts).length+' art.</span>'+
+              abcBadge(_pA1.abc,_pA1.pct,_pA1.cum)+
+            '</div>'+
+          '</div>'+
+          '<span class="sku-group-arrow">▶</span></div>'+
+        '<div class="sku-group-rows">'+artRows+'</div></div>';
+    }).join('');
+  }
+
+  // ABC análisis — Plan de Compra (provMap, solo sin pedir)
+  const provABC2={};
+  (function(){var list=Object.values(provMap).sort(function(a,b){return b.total-a.total;});var grand=list.reduce(function(s,p){return s+p.total;},0);var cum=0;list.forEach(function(p){var pct=grand?p.total/grand*100:0;cum+=pct;provABC2[p.nombre]={abc:cum<=80?'A':cum<=95?'B':'C',pct:pct,cum:cum};});}());
+  const artABC2={};
+  (function(){var m={};Object.values(provMap).forEach(function(p){Object.values(p.arts).forEach(function(a){if(!m[a.codigo])m[a.codigo]=0;m[a.codigo]+=a.total;});});var list=Object.entries(m).sort(function(a,b){return b[1]-a[1];});var grand=list.reduce(function(s,e){return s+e[1];},0);var cum=0;list.forEach(function(e){var pct=grand?e[1]/grand*100:0;cum+=pct;artABC2[e[0]]={abc:cum<=80?'A':cum<=95?'B':'C',pct:pct,cum:cum};});}());
+  const subABC2={};
+  (function(){var m={};Object.values(provMap).forEach(function(p){Object.values(p.arts).forEach(function(a){Object.entries(a.subs).forEach(function(e){var color=e[0].split('|')[0];var key=p.nombre+'|'+a.codigo+'|'+color;if(!m[key])m[key]=0;m[key]+=e[1].total;});});});var list=Object.entries(m).sort(function(a,b){return b[1]-a[1];});var grand=list.reduce(function(s,e){return s+e[1];},0);var cum=0;list.forEach(function(e){var pct=grand?e[1]/grand*100:0;cum+=pct;subABC2[e[0]]={abc:cum<=80?'A':cum<=95?'B':'C',pct:pct,cum:cum};});}());
+
+  let skuResumenHTML='<div class="empty">✓ Sin SKUs sin pedir</div>';
+  if(Object.keys(provMap).length){
+    skuResumenHTML=Object.values(provMap).sort(function(a,b){return b.total-a.total;}).map(function(prov,pi){
+      const artRows=Object.values(prov.arts).sort(function(a,b){return b.total-a.total;}).map(function(art,ai){
+        const artId='art_'+pi+'_'+ai;
+        const subRows=Object.values(art.subs).sort(function(a,b){return b.total-a.total;}).map(function(d,si){
+          const subId='sub_'+pi+'_'+ai+'_'+si;
+          const pedItems=d.pedidos.map(function(x){
+            return '<div class="sku-pedido-item"><div style="flex:1;min-width:0"><div style="font-size:.82rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+x.card.name+'</div><div style="font-size:.72rem;color:var(--muted)">'+statusPill(x.card.listName)+' '+diasChip(x.card.diasCreacion)+'</div></div><span style="font-family:var(--mono);font-size:.78rem">'+(x.qty||'?')+' un.</span><a href="'+x.card.shortUrl+'" target="_blank" class="trello-link">→</a></div>';
+          }).join('');
+          const _sA2=subABC2[prov.nombre+'|'+art.codigo+'|'+d.color]||{abc:'C',pct:0,cum:100};
+          return '<div class="sku-sub-row" id="skurow-'+subId+'" data-sid="'+subId+'" onclick="toggleSkuSubById(this)" style="padding-left:4rem">'+
+            '<div><span class="sku-sub-label">Color</span><span class="mono-val">'+d.color+'</span></div>'+
+            '<div><span class="sku-sub-label">Talle</span><span class="mono-val">'+d.talle+'</span></div>'+
+            '<div><span class="sku-tag sku-sin-pedir">🔴 '+d.total+' un.</span> '+abcBadge(_sA2.abc,_sA2.pct,_sA2.cum)+'</div>'+
+            '<div style="color:var(--muted);font-family:var(--mono);font-size:.72rem;text-align:right">'+d.pedidos.length+' ped. ▶</div></div>'+
+            '<div class="sku-pedidos-expand" id="skusub-'+subId+'"><div style="font-family:var(--mono);font-size:.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.5rem">Pedidos</div>'+pedItems+'</div>';
+        }).join('');
+        const _aA2=artABC2[art.codigo]||{abc:'C',pct:0,cum:100};
+        return '<div class="sku-group" id="'+artId+'" data-gid="'+artId+'" onclick_header="1">'+
+          '<div class="sku-group-header" data-gid="'+artId+'" onclick="toggleGroupById(this)" style="padding-left:2.5rem;background:#fafaf9">'+
+            '<div style="flex:1;min-width:0">'+
+              '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap">'+
+                '<span style="font-family:var(--mono);font-size:.82rem;font-weight:600">'+art.codigo+'</span>'+
+                '<span style="font-family:var(--mono);font-size:.75rem;font-weight:700;color:#b91c1c">'+art.total+' un.</span>'+
+                abcBadge(_aA2.abc,_aA2.pct,_aA2.cum)+
+              '</div>'+
+              (art.desc?'<div style="font-size:.72rem;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+art.desc+'</div>':'')+
+            '</div>'+
+            '<span class="sku-group-arrow">▶</span>'+
+          '</div>'+
+          '<div class="sku-group-rows">'+subRows+'</div></div>';
+      }).join('');
+      const provId='prov_'+pi;
+      const _pA2=provABC2[prov.nombre]||{abc:'C',pct:0,cum:100};
+      return '<div class="sku-group" id="'+provId+'">'+
+        '<div class="sku-group-header" data-gid="'+provId+'" onclick="toggleGroupById(this)">'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap">'+
+              '<span class="sku-group-code" style="color:#0369a1">'+prov.nombre+'</span>'+
+              '<span class="sku-group-total">'+prov.total+' un.</span>'+
+              '<span style="color:var(--muted);font-size:.72rem;font-family:var(--mono)">'+Object.keys(prov.arts).length+' art.</span>'+
+              abcBadge(_pA2.abc,_pA2.pct,_pA2.cum)+
+            '</div>'+
+          '</div>'+
+          '<span class="sku-group-arrow">▶</span></div>'+
+        '<div class="sku-group-rows">'+artRows+'</div></div>';
+    }).join('');
+  }
+
+
+  // Por cliente con expansión
+  const clienteMap={};
+  cards.forEach(c=>{
+    const cliente=c.name.split(' - ')[0].trim();
+    if (!clienteMap[cliente]) clienteMap[cliente]=[];
+    clienteMap[cliente].push(c);
+  });
+
+  const clienteSection=`
+    <div class="cliente-grid" id="clienteGrid">
+      ${Object.entries(clienteMap).sort((a,b)=>b[1].length-a[1].length).map(([nombre,clist])=>{
+        const safeId=nombre.replace(/[^a-z0-9]/gi,'_');
+        return `
+          <div>
+            <div class="cliente-card" id="ccard-${safeId}" data-nombre="${safeId}" onclick="toggleClienteData(this)">
+              <div class="cc-name">${nombre}</div>
+              <div class="cc-count">${clist.length}</div>
+              <div class="cc-sub">pedido${clist.length>1?'s':''} · ver</div>
+            </div>
+            <div class="cliente-expand" id="cexp-${safeId}">
+              <div style="padding:0.75rem 1rem">${miniPedidoRows(clist)}</div>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+
+  // Tabla todos los pedidos — con fila detalle expandible
+  const tableRows=[...cards].sort((a,b)=>(b.diasCreacion||0)-(a.diasCreacion||0)).map(c=>{
+    const skuCells=c.skus.length>0
+      ?c.skus.map(s=>{
+        const p=parseSKU(s.sku);
+        const info=getCatalog(p.codigo);
+        const descShort=info?` · ${info.desc.slice(0,25)}${info.desc.length>25?'…':''}`:'';
+        const provStr=info&&info.proveedores.length?` [${info.proveedores[0]}]`:'';
+        return `<span class="sku-tag ${skuClass(s.status)}" title="${info?info.desc+' | '+info.proveedores.join(', '):s.sku}">${p.codigo}${descShort} ${p.color} ${p.talle}${s.qty?` ×${s.qty}`:''}</span>`;
+      }).join(' ')
+      :'<span style="color:var(--muted);font-size:0.75rem">—</span>';
+    const detailFields=[
+      c.nOrden?`<div class="detail-field"><div class="detail-field-label">N° Orden</div><div class="detail-field-value">${c.nOrden}</div></div>`:'',
+      c.vendedor?`<div class="detail-field"><div class="detail-field-label">Vendedor</div><div class="detail-field-value">${c.vendedor}</div></div>`:'',
+      c.pago?`<div class="detail-field"><div class="detail-field-label">Pago</div><div class="detail-field-value">${c.pago}</div></div>`:'',
+      c.entrega?`<div class="detail-field"><div class="detail-field-label">Entrega</div><div class="detail-field-value">${c.entrega}</div></div>`:'',
+      c.customVal?`<div class="detail-field"><div class="detail-field-label">Customización</div><div class="detail-field-value"><span class="custom-tag">${c.customVal}</span></div></div>`:'',
+      `<div class="detail-field"><div class="detail-field-label">Antigüedad</div><div class="detail-field-value">${diasChip(c.diasCreacion)}</div></div>`,
+    ].filter(Boolean).join('');
+    const skuDetail=c.skus.length>0?`
+      <div class="detail-skus">
+        <div class="detail-field-label" style="margin-bottom:0.5rem">SKUs faltantes</div>
+        <div class="detail-sku-list">
+          ${c.skus.map(s=>{
+            const p=parseSKU(s.sku);
+            const info=getCatalog(p.codigo);
+            return `<div style="margin-bottom:6px">
+              <span class="sku-tag ${skuClass(s.status)}">${p.codigo} · ${p.color} · T${p.talle}${s.qty?` × ${s.qty}`:''}<span style="opacity:0.6;margin-left:3px">${s.status||'sin pedir'}</span></span>
+              ${info?`<div style="font-size:0.72rem;color:var(--muted);margin-top:2px;margin-left:2px">${info.desc}${info.proveedores.length?' · <span style="color:var(--accent)">'+info.proveedores.join(' / ')+'</span>':''}</div>`:''}
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`:'';
+    return `
+      <tr class="clickable" id="row-${c.id}" data-pid="${c.id}" onclick="togglePedidoData(this)">
+        <td class="td-name">${c.name}${c.vendedor?`<small>👤 ${c.vendedor}</small>`:''}</td>
+        <td>${statusPill(c.listName)}</td>
+        <td>${diasChip(c.diasCreacion)}</td>
+        <td style="max-width:240px">${skuCells}</td>
+        <td>${c.customVal?`<span class="custom-tag">${c.customVal}</span>`:'<span style="color:var(--muted);font-size:0.75rem">—</span>'}</td>
+        <td><a href="${c.shortUrl}" target="_blank" class="trello-link" onclick="event.stopPropagation()">Abrir →</a></td>
+      </tr>
+      <tr class="detail-row" id="detail-${c.id}" style="display:none">
+        <td colspan="6">
+          <div class="detail-content">
+            ${detailFields}
+            ${skuDetail}
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+
+  // ── Seguimiento de pagos ──────────────────────────────────────────────────
+  const COBRO_CFG = {
+    'pendiente':        {label:'Cobro pendiente',  color:'#b91c1c', bg:'#fee2e2', border:'#fecaca'},
+    'al entregar':      {label:'Al entregar',       color:'#b45309', bg:'#fef3c7', border:'#fde68a'},
+    'cheque 30':        {label:'Cheque 30d',        color:'#6d28d9', bg:'#ede9fe', border:'#ddd6fe'},
+    'cheques 30/60':    {label:'Cheques 30/60d',    color:'#6d28d9', bg:'#ede9fe', border:'#ddd6fe'},
+    'cheques 30/60/90': {label:'Cheques 30/60/90d', color:'#6d28d9', bg:'#ede9fe', border:'#ddd6fe'},
+    'cobrado':          {label:'Cobrado',           color:'#15803d', bg:'#dcfce7', border:'#bbf7d0'},
+  };
+  const FACT_CFG = {
+    'pendiente': {label:'Sin facturar',     color:'#b91c1c', bg:'#fee2e2', border:'#fecaca'},
+    'parcial':   {label:'Fact. parcial',    color:'#b45309', bg:'#fef3c7', border:'#fde68a'},
+    'total':     {label:'Facturado',        color:'#15803d', bg:'#dcfce7', border:'#bbf7d0'},
+  };
+  const activos = cards.filter(function(c){ return !c.listName.toLowerCase().includes('despacha'); });
+  const pagosPendientes = activos.filter(function(c){ return !c.cobro || c.cobro.toLowerCase() !== 'cobrado'; }).length;
+  const cobroOrder = ['pendiente','al entregar','cheque 30','cheques 30/60','cheques 30/60/90','cobrado'];
+  const cobroGroups = {};
+  activos.forEach(function(c){
+    const k = (c.cobro && c.cobro.trim()) ? c.cobro : 'Sin definir';
+    if(!cobroGroups[k]) cobroGroups[k] = [];
+    cobroGroups[k].push(c);
+  });
+  const sortedCobro = Object.entries(cobroGroups).sort(function(a,b){
+    const ai = cobroOrder.indexOf(a[0].toLowerCase());
+    const bi = cobroOrder.indexOf(b[0].toLowerCase());
+    if(ai<0&&bi<0) return 0; if(ai<0) return 1; if(bi<0) return -1; return ai-bi;
+  });
+  let pagosHTML = '<div class="empty">Sin pedidos activos</div>';
+  if(sortedCobro.length){
+    pagosHTML = sortedCobro.map(function(entry,gi){
+      const cobro = entry[0]; const list = entry[1];
+      const cfg = COBRO_CFG[cobro.toLowerCase()] || {label:cobro, color:'#6b7280', bg:'#f5f4f1', border:'#e2dfd9'};
+      const isCobrado = cobro.toLowerCase() === 'cobrado';
+      const gid = 'cobro_' + gi;
+      const rows = list.map(function(c){
+        const fk = (c.facturacion||'').toLowerCase();
+        const fCfg = FACT_CFG[fk] || {label:(c.facturacion||'Sin definir'), color:'#6b7280', bg:'#f5f4f1', border:'#e2dfd9'};
+        return '<div style="display:flex;align-items:center;gap:.75rem;padding:.85rem 1.5rem;border-top:1px solid var(--border);background:#fafaf9">'+
+          '<div style="flex:1;min-width:0">'+
+            '<div style="font-size:.88rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+c.name+'</div>'+
+            '<div style="font-size:.75rem;color:var(--muted);margin-top:4px;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'+
+              statusPill(c.listName)+
+              (c.vendedor ? '<span>· 👤 '+c.vendedor+'</span>' : '')+
+              '<span style="padding:1px 7px;border-radius:10px;background:'+fCfg.bg+';color:'+fCfg.color+';border:1px solid '+fCfg.border+';font-size:.7rem">'+fCfg.label+'</span>'+
+            '</div>'+
+          '</div>'+
+          '<div style="flex-shrink:0">'+diasChip(c.diasCreacion)+'</div>'+
+          '<a href="'+c.shortUrl+'" target="_blank" class="trello-link" style="flex-shrink:0">Abrir →</a>'+
+        '</div>';
+      }).join('');
+      return '<div class="sku-group" id="'+gid+'">'+
+        '<div class="sku-group-header" data-gid="'+gid+'" onclick="toggleGroupById(this)" style="padding:1rem 1.5rem">'+
+          '<div style="display:flex;align-items:center;gap:.75rem;flex:1;min-width:0">'+
+            '<span style="font-size:.8rem;font-weight:700;padding:4px 12px;border-radius:20px;background:'+cfg.bg+';color:'+cfg.color+';border:1px solid '+cfg.border+'">'+cfg.label+'</span>'+
+            (isCobrado
+              ? '<span style="font-size:.75rem;color:var(--muted);font-family:var(--mono)">'+list.length+' cobrado'+(list.length>1?'s':'')+'</span>'
+              : '<span style="font-size:.75rem;color:#b91c1c;font-family:var(--mono);font-weight:700">'+list.length+' pedido'+(list.length>1?'s':'')+'</span>')+
+          '</div>'+
+          '<span class="sku-group-arrow">&#9658;</span>'+
+        '</div>'+
+        '<div class="sku-group-rows">'+rows+'</div>'+
+      '</div>';
+    }).join('');
+  }
+
+
+  document.getElementById('mainContent').innerHTML=`
+    ${kpis}
+
+        <div class="filter-bar">
+      <span class="filter-label">Buscar:</span>
+      <input type="text" id="fText" placeholder="Cliente o pedido..." oninput="handleSearch(this.value)" value="${filter}" style="max-width:260px" />
+      ${filter ? '<button onclick="clearSearch()" style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:0.4rem 0.85rem;color:var(--muted);font-size:0.78rem;cursor:pointer">✕ Limpiar</button>' : ''}
+    </div>
+
+    <div class="panel" style="margin-bottom:0">
+      <div class="panel-header"><span class="panel-title">⏱ Antigüedad de pedidos</span><span class="badge">más viejo primero</span></div>
+      ${rankingHTML}
+    </div>
+
+    <div style="height:1.5rem"></div>
+
+    <div class="two-col">
+      <div class="panel" style="margin-bottom:0">
+        <div class="panel-header"><span class="panel-title">🔴 SKUs sin pedir · Por pedido</span><span class="badge ${faltCards.length>0?'danger':'success'}">${faltCards.length} pedidos</span></div>
+        ${faltHTML}
+      </div>
+      <div class="panel" style="margin-bottom:0">
+        <div class="panel-header"><span class="panel-title">🔴 Resumen global de compras</span><span class="badge ${Object.keys(provMap).length>0?'danger':'success'}">${Object.keys(provMap).length} proveedores</span></div>
+        <div>${skuResumenHTML}</div>
+      </div>
+    </div>
+
+    <div style="height:1.5rem"></div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📦 Todos los SKUs pedidos · Por proveedor</span>
+        <span class="badge">${Object.keys(provMapAll).length} proveedores · ${Object.values(provMapAll).reduce((s,p)=>s+Object.keys(p.arts).length,0)} artículos</span>
+      </div>
+      <div>${skuTodosHTML}</div>
+    </div>
+
+    <div style="height:1.5rem"></div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">💰 Seguimiento de pagos</span>
+        <span class="badge ${pagosPendientes>0?'danger':'success'}">${pagosPendientes} pendientes de cobro</span>
+      </div>
+      ${pagosHTML}
+    </div>
+
+    <div style="height:1.5rem"></div>
+
+    <div class="panel">
+      <div class="panel-header"><span class="panel-title">Todos los pedidos</span><span class="badge">${cards.length} tarjetas</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pedido</th><th>Estado</th><th>Antigüedad</th><th>SKUs faltantes</th><th>Customización</th><th></th></tr></thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  // Restore KPI state if active
+  if (activeKpi) {
+    document.getElementById('kpi-'+activeKpi)?.click();
+    activeKpi=null;
+  }
+}
+
+function toggleGroup(id) { const el=document.getElementById(id); if (el) el.classList.toggle('open'); }
+function toggleGroupById(el) { toggleGroup(el.getAttribute('data-gid')); }
+function toggleSkuSubById(el) { toggleSkuSub(el.getAttribute('data-sid')); }
+
+setInterval(()=>{ if (API_KEY) loadData(); },300000);
+
+window.addEventListener('DOMContentLoaded',()=>{
+  const k=localStorage.getItem('trello_key');
+  const t=localStorage.getItem('trello_token');
+  const b=localStorage.getItem('trello_board');
+  if (k&&t&&b) {
+    API_KEY=k; TOKEN=t; BOARD_ID=b;
+    document.getElementById('setup').style.display='none';
+    document.getElementById('dashboard').style.display='block';
+    loadData();
+  }
+});
+</script>
+</body>
+</html>

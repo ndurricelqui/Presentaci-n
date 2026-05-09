@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tablero Comercial CRM — Pampero Córdoba</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:          #f0eeeb;
+      --surface:     #ffffff;
+      --border:      #e2dfd9;
+      --accent:      #2563eb;
+      --text:        #1a1a1a;
+      --muted:       #6b7280;
+      --mono:        'DM Mono', monospace;
+      --display:     'Syne', sans-serif;
+      --body:        'DM Sans', sans-serif;
+      --text-1:      #1a1a1a;
+      --text-2:      #475569;
+      --text-3:      #94A3B8;
+      --blue-700:    #1D4ED8;
+      --blue-600:    #2563EB;
+      --blue-100:    #DBEAFE;
+      --blue-50:     #EFF6FF;
+      --green-700:   #15803D;
+      --green-600:   #16A34A;
+      --green-100:   #DCFCE7;
+      --red-600:     #DC2626;
+      --red-100:     #FEE2E2;
+      --amber-600:   #D97706;
+      --amber-100:   #FEF3C7;
+      --purple-600:  #7C3AED;
+      --purple-100:  #EDE9FE;
+      --orange-600:  #EA580C;
+      --orange-100:  #FFEDD5;
+      --slate-600:   #475569;
+      --shadow:      0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.05);
+      --shadow-md:   0 4px 8px rgba(0,0,0,.07), 0 2px 4px rgba(0,0,0,.04);
+      --r:           12px;
+      --r-sm:        8px;
+    }
+
+    body {
+      font-family: var(--body);
+      background: var(--bg);
+      color: var(--text-1);
+      min-height: 100vh;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── HEADER ────────────────────────────────── */
+    .header {
+      background: #ffffff;
+      padding: 0 32px;
+      height: 62px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .header-left { display: flex; align-items: center; gap: 14px; }
+    .header-logo {
+      width: 34px; height: 34px;
+      background: var(--accent);
+      border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--display);
+      font-weight: 800; font-size: 15px; color: #fff; letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+    .header-title {
+      font-family: var(--display);
+      font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -.3px;
+    }
+    .header-subtitle {
+      font-family: var(--mono);
+      font-size: 11px; color: var(--muted); margin-top: 2px; letter-spacing: .1px;
+    }
+    .header-right { display: flex; align-items: center; gap: 14px; }
+    .last-updated {
+      font-family: var(--mono);
+      font-size: 11px; color: var(--muted);
+    }
+    .source-badge {
+      font-family: var(--mono);
+      font-size: 10.5px; font-weight: 500; padding: 3px 9px;
+      border-radius: 20px; letter-spacing: .2px;
+    }
+    .badge-live  { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-demo  { background: #fef9c3; color: #a16207; border: 1px solid #fde68a; }
+    .badge-error { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+
+    .error-state {
+      background: var(--surface);
+      border: 1px solid #FCA5A5;
+      border-radius: var(--r);
+      padding: 28px 32px;
+      color: var(--text-2);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+    .error-state strong { color: var(--red-600); display: block; font-size: 14px; margin-bottom: 8px; }
+    .error-state code {
+      background: #F1F5F9; padding: 2px 7px; border-radius: 4px;
+      font-size: 12px; color: var(--text-1); font-family: monospace;
+    }
+    .refresh-btn {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 6px 13px;
+      border-radius: 6px;
+      font-family: var(--body);
+      font-size: 12.5px; font-weight: 500;
+      cursor: pointer;
+      display: flex; align-items: center; gap: 6px;
+      transition: background .15s, border-color .15s;
+    }
+    .refresh-btn:hover { background: var(--bg); border-color: #c4c0b8; }
+
+    /* ── LAYOUT ────────────────────────────────── */
+    .main {
+      padding: 26px 32px 40px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+    .section-label {
+      font-size: 10.5px; font-weight: 700; color: var(--text-3);
+      letter-spacing: 1px; text-transform: uppercase;
+      margin-bottom: 12px; margin-top: 26px;
+    }
+    .section-label:first-child { margin-top: 0; }
+
+    /* ── FILTER BAR ────────────────────────────── */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--r);
+      padding: 11px 16px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      box-shadow: var(--shadow);
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .filter-group label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-3);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .filter-bar input[type="date"] {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 12.5px;
+      font-family: inherit;
+      color: var(--text-1);
+      background: var(--bg);
+      cursor: pointer;
+    }
+    .filter-bar input[type="date"]:focus {
+      outline: none;
+      border-color: var(--blue-600);
+      box-shadow: 0 0 0 2px var(--blue-100);
+    }
+    .filter-sep {
+      width: 1px;
+      height: 22px;
+      background: var(--border);
+      margin: 0 4px;
+      flex-shrink: 0;
+    }
+    .filter-btn {
+      padding: 5px 13px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text-2);
+      font-size: 12.5px;
+      font-weight: 500;
+      font-family: inherit;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s;
+      white-space: nowrap;
+    }
+    .filter-btn:hover {
+      background: var(--blue-50);
+      color: var(--blue-600);
+      border-color: var(--blue-100);
+    }
+    .filter-btn.active {
+      background: var(--blue-600);
+      color: #fff;
+      border-color: var(--blue-600);
+    }
+    .filter-select {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 12.5px;
+      font-family: inherit;
+      color: var(--text-1);
+      background: var(--bg);
+      cursor: pointer;
+      max-width: 160px;
+    }
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--blue-600);
+      box-shadow: 0 0 0 2px var(--blue-100);
+    }
+    .filter-badge {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: var(--blue-100);
+      color: var(--blue-700);
+      font-weight: 600;
+      display: none;
+      margin-left: 4px;
+    }
+
+    /* ── KPI GRID ──────────────────────────────── */
+    .kpi-grid-primary {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 14px;
+    }
+    .kpi-grid-secondary {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .kpi-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      padding: 18px 20px 16px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+      transition: box-shadow .2s, transform .2s;
+      cursor: default;
+    }
+    .kpi-card:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-1px);
+    }
+    .kpi-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: var(--r) var(--r) 0 0;
+    }
+    .kpi-card.c-blue::after   { background: var(--blue-600); }
+    .kpi-card.c-green::after  { background: var(--green-600); }
+    .kpi-card.c-red::after    { background: var(--red-600); }
+    .kpi-card.c-amber::after  { background: var(--amber-600); }
+    .kpi-card.c-slate::after  { background: #64748B; }
+    .kpi-card.c-purple::after { background: var(--purple-600); }
+
+    .kpi-icon {
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 12px;
+    }
+    .kpi-icon svg { width: 16px; height: 16px; }
+    .c-blue   .kpi-icon { background: var(--blue-50);    color: var(--blue-600); }
+    .c-green  .kpi-icon { background: var(--green-100);  color: var(--green-600); }
+    .c-red    .kpi-icon { background: var(--red-100);    color: var(--red-600); }
+    .c-amber  .kpi-icon { background: var(--amber-100);  color: var(--amber-600); }
+    .c-slate  .kpi-icon { background: #F1F5F9;           color: #64748B; }
+    .c-purple .kpi-icon { background: var(--purple-100); color: var(--purple-600); }
+
+    .kpi-label {
+      font-size: 10.5px; font-weight: 700; color: var(--text-3);
+      letter-spacing: .6px; text-transform: uppercase; margin-bottom: 6px;
+    }
+    .kpi-value {
+      font-size: 2.2rem; font-weight: 800; line-height: 1;
+      letter-spacing: -2px; color: var(--text-1);
+    }
+    .c-green  .kpi-value { color: var(--green-700); }
+    .c-red    .kpi-value { color: var(--red-600); }
+    .c-amber  .kpi-value { color: var(--amber-600); }
+    .c-purple .kpi-value { color: var(--purple-600); }
+    .kpi-sub { font-size: 11.5px; color: var(--text-3); margin-top: 5px; }
+
+    /* KPI secundario (fila inferior) */
+    .kpi-card.kpi-sm { padding: 14px 16px 12px; }
+    .kpi-card.kpi-sm .kpi-icon { width: 26px; height: 26px; margin-bottom: 8px; }
+    .kpi-card.kpi-sm .kpi-icon svg { width: 13px; height: 13px; }
+    .kpi-card.kpi-sm .kpi-value { font-size: 1.7rem; letter-spacing: -1.5px; }
+    .kpi-card.kpi-sm .kpi-sub { font-size: 11px; }
+
+    /* Win rate progress bar */
+    .wr-bar {
+      height: 4px;
+      background: var(--border);
+      border-radius: 2px;
+      margin: 8px 0 4px;
+      overflow: hidden;
+    }
+    .wr-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: currentColor;
+      transition: width .8s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* Días sin contacto pill en tabla */
+    .dias-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; white-space: nowrap;
+    }
+    .dias-pill.ok     { background: var(--green-100); color: var(--green-700); }
+    .dias-pill.warn   { background: var(--amber-100); color: var(--amber-600); }
+    .dias-pill.danger { background: var(--red-100);   color: var(--red-600); }
+
+    /* KPI card layout */
+    .kpi-card { display: flex; flex-direction: column; }
+
+    /* ── CHART CARDS ───────────────────────────── */
+    .charts-row { display: grid; gap: 14px; }
+    .row-2col   { grid-template-columns: 2fr 1fr; }
+    .row-3col   { grid-template-columns: 1fr 1fr 1fr; }
+
+    .chart-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      padding: 20px 22px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+    }
+    .chart-head { margin-bottom: 16px; }
+    .chart-title { font-size: 13px; font-weight: 600; color: var(--text-1); }
+    .chart-subtitle { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+    .chart-wrap { position: relative; }
+    .chart-insight {
+      padding: 12px 18px 14px;
+      font-size: 12px;
+      color: var(--text-2);
+      border-top: 1px solid var(--border);
+      line-height: 1.7;
+    }
+
+    /* ── TABLE ─────────────────────────────────── */
+    .table-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .table-header {
+      padding: 16px 22px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .table-header h3 { font-size: 13px; font-weight: 600; color: var(--text-1); }
+    .table-header p  { font-size: 11.5px; color: var(--text-3); margin-top: 2px; }
+    .pill-count {
+      background: var(--blue-100); color: var(--blue-700);
+      font-size: 11.5px; font-weight: 700;
+      padding: 4px 11px; border-radius: 20px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead th {
+      padding: 9px 16px;
+      text-align: left;
+      font-size: 10.5px; font-weight: 700; color: var(--text-3);
+      letter-spacing: .6px; text-transform: uppercase;
+      background: #F8FAFC;
+      border-bottom: 1px solid var(--border);
+    }
+    tbody tr {
+      border-bottom: 1px solid #F1F5F9;
+      transition: background .1s;
+    }
+    tbody tr:hover { background: #F8FAFC; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody td {
+      padding: 11px 16px;
+      font-size: 13px;
+      color: var(--text-2);
+      vertical-align: middle;
+    }
+    .td-empresa { font-weight: 600; color: var(--text-1); }
+
+    /* ── BADGES ────────────────────────────────── */
+    .badge {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      font-size: 11px; font-weight: 600;
+      white-space: nowrap;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+
+    .b-conv { background: var(--blue-100);   color: var(--blue-700); }
+    .b-conv .dot  { background: var(--blue-600); }
+    .b-pres { background: var(--amber-100);  color: var(--amber-600); }
+    .b-pres .dot  { background: var(--amber-600); }
+    .b-nego { background: var(--purple-100); color: var(--purple-600); }
+    .b-nego .dot  { background: var(--purple-600); }
+    .b-cata { background: var(--orange-100); color: var(--orange-600); }
+    .b-cata .dot  { background: var(--orange-600); }
+    .b-pedi { background: var(--green-100);  color: var(--green-700); }
+    .b-pedi .dot  { background: var(--green-600); }
+
+    /* ── AVATARES ──────────────────────────────── */
+    .avatar {
+      width: 26px; height: 26px; border-radius: 50%;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #fff;
+    }
+    .av-nico { background: #2563EB; }
+    .av-sofi { background: #7C3AED; }
+    .av-def  { background: #64748B; }
+
+    /* ── ACTIVIDAD ─────────────────────────────── */
+    .act { font-size: 12px; }
+    .act-ok     { color: var(--green-600); }
+    .act-warn   { color: var(--amber-600); }
+    .act-danger { color: var(--red-600); }
+
+    /* ── LOADING / EMPTY ───────────────────────── */
+    .loading {
+      display: flex; align-items: center; justify-content: center;
+      height: 180px; color: var(--text-3); font-size: 13px; gap: 10px;
+    }
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border);
+      border-top-color: var(--blue-600);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .empty-chart {
+      display: flex; align-items: center; justify-content: center;
+      height: 100%; font-size: 12px; color: var(--text-3);
+    }
+
+    /* ── OPEN BTN ──────────────────────────────── */
+    .open-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 4px 11px;
+      border-radius: 6px;
+      border: 1px solid var(--blue-100);
+      background: var(--blue-50);
+      color: var(--blue-600);
+      font-size: 11.5px; font-weight: 600;
+      text-decoration: none;
+      transition: background .15s, border-color .15s, color .15s;
+      white-space: nowrap;
+    }
+    .open-btn:hover {
+      background: var(--blue-600);
+      border-color: var(--blue-600);
+      color: #fff;
+    }
+
+    /* ── TABS GESTIÓN COMERCIAL ───────────────── */
+    .gestion-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .tab-nav {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: #F8FAFC;
+      padding: 0 4px;
+      gap: 2px;
+      overflow-x: auto;
+    }
+    .tab-btn {
+      display: flex; align-items: center; gap: 8px;
+      padding: 13px 18px;
+      border: none; background: none;
+      font-family: inherit;
+      font-size: 13px; font-weight: 500;
+      color: var(--text-2);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      white-space: nowrap;
+      transition: color .15s, border-color .15s;
+    }
+    .tab-btn:hover { color: var(--blue-600); }
+    .tab-btn.active {
+      color: var(--blue-700);
+      font-weight: 600;
+      border-bottom-color: var(--blue-600);
+      background: transparent;
+    }
+    .tab-count {
+      font-size: 11px; font-weight: 700;
+      padding: 2px 8px; border-radius: 20px;
+      background: var(--border); color: var(--text-2);
+      min-width: 22px; text-align: center;
+      transition: background .2s, color .2s;
+    }
+    .tab-btn.active .tab-count {
+      background: var(--blue-100); color: var(--blue-700);
+    }
+    .tab-btn[data-urgency="warn"] .tab-count  { background: var(--amber-100); color: var(--amber-600); }
+    .tab-btn[data-urgency="danger"] .tab-count { background: var(--red-100);   color: var(--red-600); }
+    .tab-pane { display: block; }
+    .tab-pane.tab-hidden { display: none; }
+
+    /* ── RESPONSIVE ────────────────────────────── */
+    @media (max-width: 1280px) {
+      .kpi-grid-primary   { grid-template-columns: repeat(3, 1fr); }
+      .kpi-grid-secondary { grid-template-columns: repeat(4, 1fr); }
+      .row-3col           { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 900px) {
+      .kpi-grid-primary, .kpi-grid-secondary { grid-template-columns: repeat(2, 1fr); }
+      .row-2col, .row-3col { grid-template-columns: 1fr; }
+      .main       { padding: 18px 14px 32px; }
+      .header     { padding: 0 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════════════ -->
+<header class="header">
+  <div class="header-left">
+    <div class="header-logo">P</div>
+    <div>
+      <div class="header-title">Rotación Comercial</div>
+      <div class="header-subtitle">Pampero Córdoba · Local minorista</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <span class="last-updated" id="lastUpdated">—</span>
+    <span class="source-badge badge-demo" id="sourceBadge">● Demo</span>
+    <button class="refresh-btn" onclick="loadData()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" width="13" height="13">
+        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+        <path d="M21 3v5h-5"/>
+        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+        <path d="M8 16H3v5"/>
+      </svg>
+      Actualizar
+    </button>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════════════════
+     MAIN
+════════════════════════════════════════════════════ -->
+<main class="main">
+
+  <!-- Filtro de fechas -->
+  <div class="filter-bar">
+    <div class="filter-group">
+      <label>Desde</label>
+      <input type="date" id="fechaDesde" onchange="onFilterChange()">
+    </div>
+    <div class="filter-group">
+      <label>Hasta</label>
+      <input type="date" id="fechaHasta" onchange="onFilterChange()">
+    </div>
+    <div class="filter-sep"></div>
+    <button class="filter-btn" id="btnHoy" onclick="setHoy()">Hoy</button>
+    <button class="filter-btn" id="btnSemana" onclick="setEstaSemana()">Esta semana</button>
+    <button class="filter-btn" id="btnMes" onclick="setEsteMes()">Este mes</button>
+    <button class="filter-btn" id="btnTodo" onclick="verTodo()">Ver todo</button>
+    <div class="filter-sep"></div>
+    <div class="filter-group">
+      <label>Mes</label>
+      <select id="selMes" class="filter-select" onchange="setMesFiltro()">
+        <option value="">— Elegir mes —</option>
+      </select>
+    </div>
+    <span class="filter-badge" id="filterBadge"></span>
+  </div>
+
+  <!-- KPIs -->
+  <div class="section-label">Métricas clave</div>
+  <div class="kpi-grid-primary" id="kpiGridPrimary">
+    <div class="loading" style="grid-column:1/-1"><div class="spinner"></div> Cargando…</div>
+  </div>
+  <div class="kpi-grid-secondary" id="kpiGridSecondary"></div>
+
+  <!-- Actividad comercial -->
+  <div class="section-label">Actividad comercial</div>
+  <div class="charts-row row-3col">
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Empresas nuevas / Activadas por día</div>
+        <div class="chart-subtitle" id="lineChartSubtitle">Empresas nuevas vs. activadas con interés real — últimas 2 semanas</div>
+      </div>
+      <div class="chart-wrap" style="height:210px">
+        <canvas id="chartLine"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Duración promedio por resultado</div>
+        <div class="chart-subtitle" id="velocidadSubtitle">Días promedio entre creación y última actividad</div>
+      </div>
+      <div class="chart-wrap" data-chart="velocidad" style="height:210px">
+        <canvas id="chartVelocidad"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Leads por origen</div>
+        <div class="chart-subtitle">Empresas nuevas por fuente de captación</div>
+      </div>
+      <div class="chart-wrap" data-chart="origen" style="height:210px">
+        <canvas id="chartOrigen"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pipeline y conversión -->
+  <div class="section-label">Pipeline y conversión</div>
+  <div class="charts-row row-3col">
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Pipeline por etapa</div>
+        <div class="chart-subtitle">Distribución de oportunidades activas</div>
+      </div>
+      <div class="chart-wrap" style="height:195px">
+        <canvas id="chartPipeline"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Origen de cierres ganados</div>
+        <div class="chart-subtitle">De dónde provienen las ventas cerradas</div>
+      </div>
+      <div class="chart-wrap" data-chart="ganados" style="height:195px">
+        <canvas id="chartGanados"></canvas>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-head">
+        <div class="chart-title">Motivos de pérdida</div>
+        <div class="chart-subtitle">Columna "razón" — solo leads perdidos</div>
+      </div>
+      <div class="chart-wrap" data-chart="perdidas" style="height:195px">
+        <canvas id="chartPerdidas"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Gestión comercial -->
+  <div class="section-label">Gestión comercial</div>
+  <div class="gestion-card">
+    <div class="tab-nav">
+      <button class="tab-btn active" data-tab="seguimientos" onclick="switchTab('seguimientos')">
+        Seguimientos activos
+        <span class="tab-count" id="countSeguimientos">—</span>
+      </button>
+      <button class="tab-btn" data-tab="contactados" onclick="switchTab('contactados')">
+        Contactados sin respuesta
+        <span class="tab-count" id="countContactados">—</span>
+      </button>
+      <button class="tab-btn" data-tab="recontactos" onclick="switchTab('recontactos')">
+        Recontactos comerciales
+        <span class="tab-count" id="countRecontactos">—</span>
+      </button>
+    </div>
+    <div id="tabSeguimientos" class="tab-pane">
+      <div class="loading"><div class="spinner"></div> Cargando…</div>
+    </div>
+    <div id="tabContactados" class="tab-pane tab-hidden"></div>
+    <div id="tabRecontactos" class="tab-pane tab-hidden"></div>
+  </div>
+
+
+</main>
+
+<!-- ════════════════════════════════════════════════════
+     SCRIPT
+════════════════════════════════════════════════════ -->
+<script>
+'use strict';
+
+/* ── CONFIG ─────────────────────────────────── */
+const SHEET_ID = '1ylWIF1MzuXErN7lvT3OBjFECMIgak872ZENi73bcSeU';
+const SHEET_EDIT_URL = 'https://docs.google.com/spreadsheets/d/1ylWIF1MzuXErN7lvT3OBjFECMIgak872ZENi73bcSeU/edit';
+const SHEET_NAME = 'CRM';
+const INACTIVO_DIAS = 3;
+
+const ETAPAS_ACTIVAS = [
+  'En conversacion',
+  'Presupuesto',
+  'Negociacion',
+  'Catálogo enviado',
+  'Pedido'
+];
+
+const ETAPAS_ACTIVADAS = [
+  'En conversacion',
+  'Presupuesto',
+  'Negociacion',
+  'Pedido'
+];
+const ETAPAS_ACTIVADAS_NORM = ETAPAS_ACTIVADAS.map(norm);
+function esActivada(etapa) { return ETAPAS_ACTIVADAS_NORM.includes(norm(etapa)); }
+
+/* ── UTILS ──────────────────────────────────── */
+function norm(s) {
+  return (s || '').trim()
+    .toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/\s+/g, ' ');
+}
+const ETAPAS_NORM = ETAPAS_ACTIVAS.map(norm);
+function esActiva(etapa) { return ETAPAS_NORM.includes(norm(etapa)); }
+
+function parseDate(s) {
+  if (!s) return null;
+  if (s instanceof Date) {
+    if (isNaN(s)) return null;
+    return new Date(s.getFullYear(), s.getMonth(), s.getDate());
+  }
+  s = String(s).trim();
+  if (!s) return null;
+  // Formato gviz: Date(2026,2,1) o Date(2026,2,1,0,0,0) — mes en base 0
+  const gviz = s.match(/^Date\((\d+),(\d+),(\d+)/);
+  if (gviz) return new Date(+gviz[1], +gviz[2], +gviz[3], 0, 0, 0, 0);
+  // Formato dd/mm/yyyy
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) {
+    const [d, m, y] = s.split('/');
+    return new Date(+y, +m - 1, +d);
+  }
+  // Formato yyyy-mm-dd
+  if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+    return new Date(+s.slice(0,4), +s.slice(5,7) - 1, +s.slice(8,10));
+  }
+  return null;
+}
+
+function diffDays(a, b) {
+  const ms = 86400000;
+  return Math.round((midnight(b) - midnight(a)) / ms);
+}
+function midnight(d) {
+  const x = new Date(d); x.setHours(0,0,0,0); return x;
+}
+function fmtShort(d) {
+  return d.toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit' });
+}
+function toISO(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+
+/* ── HELPERS DE COLUMNA ─────────────────────── */
+
+// Devuelve el primer valor no vacío de la fila para cualquiera de los nombres de columna dados
+// (todos los nombres deben estar ya en formato normalizado: minúsculas + guión_bajo)
+function getCol(row, variants) {
+  for (const v of variants) {
+    if (row[v] !== undefined && row[v] !== '') return row[v];
+  }
+  return '';
+}
+
+// Devuelve un objeto Date (o null) buscando la fecha en las columnas variantes
+function getFecha(row, variants) {
+  return parseDate(getCol(row, variants));
+}
+
+// true si fecha cae dentro del rango [desde, hasta].
+// Sin filtro activo → siempre true. Con filtro pero sin fecha → false.
+function isInDateRange(fecha, desde, hasta) {
+  if (!desde && !hasta) return true;
+  if (!fecha) return false;
+  const iso = toISO(fecha);
+  return (!desde || iso >= desde) && (!hasta || iso <= hasta);
+}
+
+/* ── CSV PARSER ─────────────────────────────── */
+function parseCSV(raw) {
+  const rows = raw.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
+  if (rows.length < 2) return [];
+  const hdrs = splitCSVRow(rows[0]).map(h => h.toLowerCase().trim().replace(/^﻿/, ''));
+  return rows.slice(1).map(r => {
+    const vals = splitCSVRow(r);
+    const obj = {};
+    hdrs.forEach((h, i) => { obj[h] = (vals[i] || '').trim(); });
+    return obj;
+  }).filter(r => r.lead_id || r.empresa);
+}
+function splitCSVRow(line) {
+  const out = []; let cur = ''; let q = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { q = !q; }
+    else if (line[i] === ',' && !q) { out.push(cur); cur = ''; }
+    else { cur += line[i]; }
+  }
+  out.push(cur.replace(/\r$/, ''));
+  return out;
+}
+
+/* ── MOCK DATA ──────────────────────────────── */
+function getMockData() {
+  const hoy = new Date(); hoy.setHours(0,0,0,0);
+  function da(n) {
+    const d = new Date(hoy); d.setDate(d.getDate() - n);
+    return d.toISOString().substring(0,10);
+  }
+  return [
+    { lead_id:'1',  created_at:da(45), fecha_activacion:da(40), owner:'Nicolás', empresa:'Constructora del Norte SA',    contacto:'Ing. Marcos Ferreyra',   origen:'Referido',      etapa:'Negociacion',       ultima_actividad:da(1),  resultado:'En proceso',  razon_perdida:'',           notas:'Uniformes de obra, interesado en combo completo' },
+    { lead_id:'2',  created_at:da(30), fecha_activacion:da(25), owner:'Sofi',    empresa:'Frigorífico San Martín',        contacto:'Luciana Gómez',         origen:'Web',           etapa:'Presupuesto',       ultima_actividad:da(3),  resultado:'En proceso',  razon_perdida:'',           notas:'Guardapolvos + botas de seguridad para 60 personas' },
+    { lead_id:'3',  created_at:da(60), fecha_activacion:da(55), owner:'Nicolás', empresa:'Cooperativa El Progreso',       contacto:'Héctor Ruiz',           origen:'Feria',         etapa:'Cerrado',           ultima_actividad:da(0),  resultado:'Ganado',      razon_perdida:'',           notas:'Primer pedido cerrado, 40 unidades' },
+    { lead_id:'4',  created_at:da(25), fecha_activacion:'',     owner:'Sofi',    empresa:'Distribuidora Andes SRL',       contacto:'Pablo Sánchez',         origen:'Instagram',     etapa:'Catálogo enviado',  ultima_actividad:da(9),  resultado:'En proceso',  razon_perdida:'',           recontactado:'No',  notas:'Catálogo completo enviado, esperar respuesta' },
+    { lead_id:'5',  created_at:da(90), fecha_activacion:da(85), owner:'Nicolás', empresa:'Municipalidad de Río Cuarto',   contacto:'Lic. Valentina Torres', origen:'Referido',      etapa:'Cerrado',           ultima_actividad:da(20), resultado:'Ganado',      razon_perdida:'',           notas:'Licitación pública adjudicada' },
+    { lead_id:'6',  created_at:da(15), fecha_activacion:da(12), owner:'Sofi',    empresa:'Industrias Córdoba SA',         contacto:'Roberto Giménez',       origen:'Llamada fría',  etapa:'En conversacion',   ultima_actividad:da(2),  resultado:'En proceso',  razon_perdida:'',           notas:'Primera reunión agendada para la semana próxima' },
+    { lead_id:'7',  created_at:da(50), fecha_activacion:da(47), owner:'Nicolás', empresa:'Agro Sur SRL',                  contacto:'Jorge Medina',          origen:'LinkedIn',      etapa:'Cerrado',           ultima_actividad:da(30), resultado:'Perdido',     razon_perdida:'Precio',     notas:'Competidor más barato del mercado' },
+    { lead_id:'8',  created_at:da(20), fecha_activacion:da(17), owner:'Sofi',    empresa:'Logística Express SAS',         contacto:'María Cabrera',         origen:'Web',           etapa:'Negociacion',       ultima_actividad:da(1),  resultado:'En proceso',  razon_perdida:'',           notas:'Negociando descuento por volumen mínimo 100u' },
+    { lead_id:'9',  created_at:da(35), fecha_activacion:da(30), owner:'Nicolás', empresa:'Clínica del Valle',             contacto:'Dr. Fernando Altamira', origen:'Referido',      etapa:'Presupuesto',       ultima_actividad:da(7),  resultado:'En proceso',  razon_perdida:'',           notas:'Ropa de trabajo staff médico y administrativo' },
+    { lead_id:'10', created_at:da(70), fecha_activacion:da(65), owner:'Sofi',    empresa:'Minera Patagonik SA',           contacto:'Ing. Carolina Paz',     origen:'Feria',         etapa:'Cerrado',           ultima_actividad:da(45), resultado:'Perdido',     razon_perdida:'Competencia',notas:'Se fueron con otro proveedor regional' },
+    { lead_id:'11', created_at:da(10), fecha_activacion:da(8),  owner:'Nicolás', empresa:'Terminal Cargas CBA',           contacto:'Gonzalo Ríos',          origen:'WhatsApp',      etapa:'En conversacion',   ultima_actividad:da(0),  resultado:'En proceso',  razon_perdida:'',           notas:'Interés en EPP y calzado de seguridad' },
+    { lead_id:'12', created_at:da(40), fecha_activacion:da(36), owner:'Sofi',    empresa:'Supermercados Del Pueblo',      contacto:'Mónica Heredia',        origen:'Web',           etapa:'Cerrado',           ultima_actividad:da(35), resultado:'Ganado',      razon_perdida:'',           notas:'Pedido de 80 uniformes cerrado' },
+    { lead_id:'13', created_at:da(8),  fecha_activacion:'',     owner:'Sofi',    empresa:'Automotriz Sur SRL',            contacto:'Diego Acosta',          origen:'Instagram',     etapa:'Catálogo enviado',  ultima_actividad:da(10), resultado:'En proceso',  razon_perdida:'',           recontactado:'',    notas:'Ropa de mecánicos y overoles' },
+    { lead_id:'14', created_at:da(55), fecha_activacion:da(50), owner:'Nicolás', empresa:'Plásticos del Centro SA',       contacto:'Natalia Vega',          origen:'Llamada fría',  etapa:'Cerrado',           ultima_actividad:da(40), resultado:'Perdido',     razon_perdida:'Precio',     notas:'Presupuesto elevado para su escala' },
+    { lead_id:'15', created_at:da(5),  fecha_activacion:da(3),  owner:'Sofi',    empresa:'Hospital Regional Norte',       contacto:'Lic. Claudia Bustos',   origen:'Referido',      etapa:'Presupuesto',       ultima_actividad:da(1),  resultado:'En proceso',  razon_perdida:'',           notas:'Cotización para 80 personas, plazos ajustados' },
+    { lead_id:'16', created_at:da(12), fecha_activacion:da(9),  owner:'Nicolás', empresa:'Metalúrgica Sur SRL',           contacto:'Esteban Moreno',        origen:'LinkedIn',      etapa:'Negociacion',       ultima_actividad:da(3),  resultado:'En proceso',  razon_perdida:'',           notas:'Calzado de seguridad industrial, 120 pares' },
+    { lead_id:'17', created_at:da(22), fecha_activacion:da(19), owner:'Sofi',    empresa:'Transporte Córdoba SA',         contacto:'Ramona Etchart',        origen:'WhatsApp',      etapa:'Cerrado',           ultima_actividad:da(18), resultado:'Ganado',      razon_perdida:'',           notas:'50 unidades chalecos y pantalones' },
+    { lead_id:'18', created_at:da(3),  fecha_activacion:da(1),  owner:'Nicolás', empresa:'Bodega Los Olivos SRL',         contacto:'Sebastián Funes',       origen:'Feria',         etapa:'En conversacion',   ultima_actividad:da(0),  resultado:'En proceso',  razon_perdida:'',           notas:'Primer contacto en feria de trabajo' },
+    { lead_id:'19', created_at:da(65), fecha_activacion:'',     owner:'Sofi',    empresa:'Construcciones Velasco',        contacto:'Martín Velasco',        origen:'Web',           etapa:'Cerrado',           ultima_actividad:da(50), resultado:'Perdido',     razon_perdida:'Sin respuesta',notas:'No volvió a responder después de tercer contacto' },
+    { lead_id:'20', created_at:da(9),  fecha_activacion:da(7),  owner:'Nicolás', empresa:'Cooperativa Agropecuaria',      contacto:'Ana Guzmán',            origen:'Referido',      etapa:'Pedido',            ultima_actividad:da(1),  resultado:'En proceso',  razon_perdida:'',           notas:'Pedido confirmado, en proceso de armado' },
+    { lead_id:'21', created_at:da(18), fecha_activacion:da(15), owner:'Sofi',    empresa:'Maderera El Pino SRL',          contacto:'Ricardo Palacio',       origen:'Llamada fría',  etapa:'En conversacion',   ultima_actividad:da(4),  resultado:'En proceso',  razon_perdida:'',           notas:'Primera charla positiva, enviamos info general' },
+    { lead_id:'22', created_at:da(0),  fecha_activacion:'',     owner:'Nicolás', empresa:'Química Córdoba SA',            contacto:'Fernanda Lagos',        origen:'Instagram',     etapa:'Contactado',        ultima_actividad:da(0),  resultado:'En proceso',  razon_perdida:'',           notas:'Consulta por DM de Instagram, derivar a Sofi' },
+    { lead_id:'23', created_at:da(0),  fecha_activacion:'',     owner:'Sofi',    empresa:'Alimentar SA',                  contacto:'Juliana Ramos',         origen:'Web',           etapa:'Contactado',        ultima_actividad:da(0),  resultado:'En proceso',  razon_perdida:'',           notas:'Formulario web, respondido hoy' },
+    { lead_id:'24', created_at:da(14), fecha_activacion:'',     owner:'Sofi',    empresa:'Farmacéutica Norte SRL',        contacto:'Eduardo Blanc',         origen:'Referido',      etapa:'Contactado',        ultima_actividad:da(14), resultado:'No responde', razon_perdida:'',           recontactado:'',    notas:'Tres intentos sin respuesta' },
+    { lead_id:'25', created_at:da(80), fecha_activacion:da(75), owner:'Nicolás', empresa:'Cerámica Pacífico SA',          contacto:'Patricia Lemos',        origen:'Feria',         etapa:'Cerrado',           ultima_actividad:da(75), resultado:'Perdido',     razon_perdida:'Timing',     notas:'No era buen momento, retomar en Q3' },
+    { lead_id:'26', created_at:da(14), fecha_activacion:da(11), owner:'Nicolás', empresa:'Grupo Construir SA',            contacto:'Damián Lozano',         origen:'Referido',      etapa:'Presupuesto',       ultima_actividad:da(16), resultado:'En proceso',  razon_perdida:'',           notas:'Esperando respuesta al presupuesto' },
+    { lead_id:'27', created_at:da(6),  fecha_activacion:da(4),  owner:'Sofi',    empresa:'Textil Andina SRL',             contacto:'Verónica Moran',        origen:'Instagram',     etapa:'En conversacion',   ultima_actividad:da(1),  resultado:'En proceso',  razon_perdida:'',           notas:'Interés en uniformes corporativos' },
+    { lead_id:'28', created_at:da(50), fecha_activacion:da(46), owner:'Nicolás', empresa:'Frigorífico del Norte SA',      contacto:'Claudio Mansilla',      origen:'Feria',         etapa:'Cerrado',           ultima_actividad:da(48), resultado:'Ganado',      razon_perdida:'',           notas:'Contrato anual cerrado' },
+    { lead_id:'29', created_at:da(33), fecha_activacion:'',     owner:'Sofi',    empresa:'Importadora Sur SAS',           contacto:'Romina Soto',           origen:'LinkedIn',      etapa:'Catálogo enviado',  ultima_actividad:da(20), resultado:'En proceso',  razon_perdida:'',           recontactado:'Sí',  notas:'Sin respuesta al catálogo aún' },
+    { lead_id:'30', created_at:da(130),fecha_activacion:da(125),owner:'Nicolás', empresa:'Cerámica Del Valle SA',          contacto:'Oscar Bianco',          origen:'Feria',         etapa:'Cerrado',           ultima_actividad:da(95), resultado:'Ganado',      razon_perdida:'',           recontactado:'',    notas:'Contrato cerrado hace 3 meses, sin contacto posterior' },
+    { lead_id:'31', created_at:da(140),fecha_activacion:da(135),owner:'Sofi',    empresa:'Maquinaria Córdoba SRL',         contacto:'Darío Herrero',         origen:'LinkedIn',      etapa:'Cerrado',           ultima_actividad:da(105),resultado:'Perdido',     razon_perdida:'Precio',     recontactado:'',    notas:'Presupuesto superó su techo por 15%' },
+    { lead_id:'32', created_at:da(160),fecha_activacion:da(155),owner:'Nicolás', empresa:'Transporte del Norte SA',        contacto:'Verónica Acuña',        origen:'Referido',      etapa:'Cerrado',           ultima_actividad:da(115),resultado:'Perdido',     razon_perdida:'Competencia',recontactado:'',    notas:'Se fue con competidor que tiene depósito local' },
+    { lead_id:'33', created_at:da(120),fecha_activacion:da(115),owner:'Sofi',    empresa:'Industria Plástica Cba',         contacto:'Martín Rueda',          origen:'Web',           etapa:'Cerrado',           ultima_actividad:da(100),resultado:'Perdido',     razon_perdida:'No hay necesidad',recontactado:'', notas:'Dijeron que no necesitan uniformes por ahora' },
+  ];
+}
+
+/* ── CHART REGISTRY ─────────────────────────── */
+const charts = {};
+function destroyChart(id) { if (charts[id]) { charts[id].destroy(); delete charts[id]; } }
+const tooltip = {
+  backgroundColor: '#0F172A',
+  titleColor: '#F8FAFC',
+  bodyColor: '#CBD5E1',
+  padding: 10,
+  cornerRadius: 8,
+  borderColor: 'rgba(255,255,255,.06)',
+  borderWidth: 1,
+};
+const scaleBase = {
+  grid: { color: '#F1F5F9' },
+  ticks: { color: '#94A3B8', font: { size: 11 } }
+};
+const scaleNogrid = { grid: { display: false }, ticks: { color: '#94A3B8', font: { size: 11 } } };
+
+// Recupera el wrapper de un gráfico que puede haber sido reemplazado por empty-chart
+function getChartWrap(dataChart) {
+  return document.querySelector(`.chart-wrap[data-chart="${dataChart}"]`);
+}
+function resetCanvas(dataChart, canvasId) {
+  const wrap = getChartWrap(dataChart);
+  if (wrap) wrap.innerHTML = `<canvas id="${canvasId}"></canvas>`;
+}
+
+/* ── FILTER LOGIC ───────────────────────────── */
+let rawData = null;
+
+function onFilterChange() {
+  document.getElementById('selMes').value = '';
+  updateFilterButtons(null);
+  buildWithFilter();
+}
+
+function buildWithFilter() {
+  if (!rawData) return;
+  build();
+}
+
+function updateFilterButtons(active) {
+  ['btnHoy','btnSemana','btnMes','btnTodo'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  if (active) document.getElementById(active).classList.add('active');
+}
+
+function setHoy() {
+  document.getElementById('selMes').value = '';
+  const h = toISO(new Date());
+  document.getElementById('fechaDesde').value = h;
+  document.getElementById('fechaHasta').value = h;
+  updateFilterButtons('btnHoy');
+  buildWithFilter();
+}
+
+function setEstaSemana() {
+  document.getElementById('selMes').value = '';
+  const hoy = new Date();
+  const lunes = new Date(hoy); lunes.setDate(hoy.getDate() - ((hoy.getDay() + 6) % 7));
+  document.getElementById('fechaDesde').value = toISO(lunes);
+  document.getElementById('fechaHasta').value = toISO(hoy);
+  updateFilterButtons('btnSemana');
+  buildWithFilter();
+}
+
+function setEsteMes() {
+  document.getElementById('selMes').value = '';
+  const hoy = new Date();
+  document.getElementById('fechaDesde').value = toISO(new Date(hoy.getFullYear(), hoy.getMonth(), 1));
+  document.getElementById('fechaHasta').value = toISO(hoy);
+  updateFilterButtons('btnMes');
+  buildWithFilter();
+}
+
+function verTodo() {
+  document.getElementById('selMes').value = '';
+  document.getElementById('fechaDesde').value = '';
+  document.getElementById('fechaHasta').value = '';
+  updateFilterButtons('btnTodo');
+  buildWithFilter();
+}
+
+/* ── HELPERS ANÁLISIS ───────────────────────── */
+function avgDias(leads) {
+  const diffs = leads.map(r => {
+    const ca = getFecha(r, ['created_at', 'created at']);
+    const ua = getFecha(r, ['ultima_actividad', 'ultima actividad']);
+    if (!ca || !ua) return null;
+    const d = Math.round((ua - ca) / 86400000);
+    return d >= 0 ? d : null;
+  }).filter(d => d !== null);
+  if (!diffs.length) return null;
+  return Math.round(diffs.reduce((s, d) => s + d, 0) / diffs.length);
+}
+
+/* ── BUILD DASHBOARD ────────────────────────── */
+function build() {
+  if (!rawData) return;
+
+  const TODAY = new Date(); TODAY.setHours(0,0,0,0);
+  const desde = document.getElementById('fechaDesde').value;
+  const hasta  = document.getElementById('fechaHasta').value;
+
+  /* ── DATASETS FILTRADOS POR PERÍODO ── */
+
+  // Empresas nuevas: leads cuyo created_at cae en el rango
+  const empresasNuevasPeriodo = rawData.filter(r => {
+    const f = getFecha(r, ['created_at', 'created at']);
+    return isInDateRange(f, desde, hasta);
+  });
+
+  // Activadas: tienen fecha_activacion no vacía y cae en el rango
+  const activadasPeriodo = rawData.filter(r => {
+    const f = getFecha(r, ['fecha_activacion', 'fecha_de_activacion', 'fecha de activacion']);
+    if (!f) return false;
+    return isInDateRange(f, desde, hasta);
+  });
+
+  // Cerradas: resultado ganado o perdido, fecha de cierre = ultima_actividad (col J)
+  const cerradasPeriodo = rawData.filter(r => {
+    const res = norm(getCol(r, ['resultado']));
+    if (res !== 'ganado' && res !== 'perdido') return false;
+    const fc = getFecha(r, ['ultima_actividad', 'ultima actividad']);
+    return isInDateRange(fc, desde, hasta);
+  });
+
+  const ganadasPeriodo  = cerradasPeriodo.filter(r => norm(getCol(r, ['resultado'])) === 'ganado');
+  const perdidasPeriodo = cerradasPeriodo.filter(r => norm(getCol(r, ['resultado'])) === 'perdido');
+
+  const noRespondeLeads = rawData.filter(r => {
+    if (norm(getCol(r, ['resultado'])) !== 'no responde') return false;
+    const ua = getFecha(r, ['ultima_actividad', 'ultima actividad']);
+    return isInDateRange(ua, desde, hasta);
+  });
+
+  console.log('[CRM Debug] empresasNuevas:', empresasNuevasPeriodo.length, '| ganadas:', ganadasPeriodo.length, '| perdidas:', perdidasPeriodo.length, '| noResponde:', noRespondeLeads.length);
+
+  // Pipeline activo: estado actual completo, sin filtro de fechas
+  const pipelineActivo = rawData.filter(r => esActiva(getCol(r, ['etapa'])));
+
+  /* ── FILTER BADGE ── */
+  const badge = document.getElementById('filterBadge');
+  if (!desde && !hasta) {
+    badge.style.display = 'none';
+  } else {
+    const n = empresasNuevasPeriodo.length;
+    badge.style.display = 'inline-block';
+    badge.textContent = `${n} nueva${n !== 1 ? 's' : ''}`;
+  }
+
+  /* ── SEGUIMIENTOS (cálculo anticipado para KPIs) ── */
+  const STAGE_LIMITS = {
+    'negociacion':     1,
+    'presupuesto':     2,
+    'en conversacion': 3,
+    'pedido':          7,
+  };
+  const STAGE_ACCION = {
+    'negociacion':     'Pedir definición',
+    'presupuesto':     'Hacer seguimiento del presupuesto',
+    'en conversacion': 'Retomar conversación',
+    'pedido':          'Controlar avance / informar al cliente',
+  };
+  const STAGE_PRIORITY = ['pedido', 'negociacion', 'presupuesto', 'en conversacion'];
+
+  const vencidos = [];
+  rawData.forEach(r => {
+    const etapaN = norm(getCol(r, ['etapa']));
+    if (!ETAPAS_ACTIVADAS_NORM.includes(etapaN)) return;
+    const limite = STAGE_LIMITS[etapaN];
+    if (limite === undefined) return;
+    const ua = getFecha(r, ['ultima_actividad', 'ultima actividad']);
+    if (!ua) return;
+    const dias = diffDays(ua, TODAY);
+    if (dias > limite) vencidos.push({ r, dias, etapaN });
+  });
+
+  vencidos.sort((a, b) => {
+    const ia = STAGE_PRIORITY.indexOf(a.etapaN);
+    const ib = STAGE_PRIORITY.indexOf(b.etapaN);
+    if (ia !== ib) return ia - ib;
+    return b.dias - a.dias;
+  });
+
+  /* ── KPIs ── */
+  const empresasNuevasN = empresasNuevasPeriodo.length;
+  const activadasN      = activadasPeriodo.length;
+  const cerN            = cerradasPeriodo.length;
+  const cerGanN         = ganadasPeriodo.length;
+  const cerPerdN        = perdidasPeriodo.length;
+  const pipeN           = pipelineActivo.length;
+  const wr              = cerN > 0 ? Math.round(cerGanN / cerN * 100) : 0;
+  const wrColor         = wr >= 50 ? 'c-green' : wr >= 30 ? 'c-amber' : 'c-red';
+  const wrBar           = `<div class="wr-bar"><div class="wr-fill" style="width:${wr}%"></div></div><div style="font-size:11px;color:var(--text-3);margin-top:2px">${cerGanN} ganadas · ${cerPerdN} perdidas</div>`;
+
+  const tasaActiv      = empresasNuevasN > 0 ? Math.round(activadasN / empresasNuevasN * 100) : 0;
+  const tasaActivColor = tasaActiv >= 50 ? 'c-green' : tasaActiv >= 25 ? 'c-amber' : 'c-slate';
+
+  const ETAPAS_OPORT = ['presupuesto', 'negociacion', 'pedido'];
+  const oportunidadesN  = rawData.filter(r => {
+    if (!ETAPAS_OPORT.includes(norm(getCol(r, ['etapa'])))) return false;
+    const fa = getFecha(r, ['fecha_activacion', 'fecha_de_activacion', 'fecha de activacion']);
+    return isInDateRange(fa, desde, hasta);
+  }).length;
+  const presupuestosN   = pipelineActivo.filter(r => norm(getCol(r, ['etapa'])) === 'presupuesto').length;
+  const seguimientosN   = vencidos.length;
+  const oportVencidasN  = vencidos.filter(v => ETAPAS_OPORT.includes(v.etapaN)).length;
+
+  const seguimColor   = seguimientosN > 5 ? 'c-red' : seguimientosN > 2 ? 'c-amber' : 'c-slate';
+  const oportVenColor = oportVencidasN > 3 ? 'c-red' : oportVencidasN > 1 ? 'c-amber' : 'c-slate';
+
+  const kpiPrimary = [
+    { label:'Empresas nuevas',      val: empresasNuevasN,   sub:'objetivo 20/día',                     color:'c-blue',       icon: iconPhone(),    extra:'' },
+    { label:'Activadas',            val: activadasN,        sub:'con interés real',                    color:'c-green',      icon: iconCheck(),    extra:'' },
+    { label:'Tasa de activación',   val:`${tasaActiv}%`,    sub:'activadas / nuevas',                  color: tasaActivColor,icon: iconTrophy(),   extra:'' },
+    { label:'Oportunidades generadas', val: oportunidadesN, sub:'presupuesto · negociación · pedido',  color:'c-purple',     icon: iconTarget(),   extra:'' },
+    { label:'Cerradas',             val: cerN,              sub:'ganadas + perdidas',                  color:'c-green',      icon: iconCheck(),    extra:'' },
+    { label:'Win rate',             val:`${wr}%`,           sub:'ganadas / cerradas',                  color: wrColor,       icon: iconTrophy(),   extra: wrBar },
+  ];
+
+  const ETAPAS_SIN_RESP = ['contactado', 'catalogo enviado'];
+  const RESULTADO_SIN_RESP = ['', 'en proceso', 'no responde'];
+  const sinRespuesta = rawData.filter(r => {
+    if (!ETAPAS_SIN_RESP.includes(norm(getCol(r,['etapa'])))) return false;
+    const fa = getCol(r, ['fecha_activacion','fecha_de_activacion','fecha de activacion']);
+    if (fa) return false;
+    const res = norm(getCol(r,['resultado']));
+    if (!RESULTADO_SIN_RESP.includes(res)) return false;
+    const ua = getFecha(r, ['ultima_actividad','ultima actividad']);
+    if (!ua) return false;
+    return diffDays(ua, TODAY) > 7;
+  });
+  const contactadosSinRespuestaN = sinRespuesta.length;
+
+  const kpiSecondary = [
+    { label:'Pipeline activo',        val: pipeN,            sub:'estado actual',     color:'c-blue',       icon: iconPipe(),   extra:'' },
+    { label:'Seguimientos pendientes',val: seguimientosN,    sub:'requieren acción',  color: seguimColor,   icon: iconClock(),  extra:'' },
+    { label:'Presupuestos abiertos',  val: presupuestosN,    sub:'venta cercana',     color:'c-amber',      icon: iconDoc(),    extra:'' },
+    { label:'Contactados sin respuesta', val: contactadosSinRespuestaN, sub:'requieren recontacto', color: contactadosSinRespuestaN > 5 ? 'c-red' : contactadosSinRespuestaN >= 1 ? 'c-amber' : 'c-slate', icon: iconAlert(), extra:'' },
+  ];
+
+  function renderKpiCard(k, sm) {
+    return `<div class="kpi-card ${k.color}${sm ? ' kpi-sm' : ''}">
+      <div class="kpi-icon">${k.icon}</div>
+      <div class="kpi-label">${k.label}</div>
+      <div class="kpi-value">${k.val}</div>
+      ${k.extra}
+      <div class="kpi-sub">${k.sub}</div>
+    </div>`;
+  }
+
+  document.getElementById('kpiGridPrimary').innerHTML   = kpiPrimary.map(k => renderKpiCard(k, false)).join('');
+  document.getElementById('kpiGridSecondary').innerHTML = kpiSecondary.map(k => renderKpiCard(k, true)).join('');
+
+  /* ── LINE CHART ── Empresas nuevas vs Activadas ── */
+  // Si hay filtro de fechas, graficar ese rango (máx 60 días); si no, últimas 2 semanas
+  let diasArr;
+  if (desde && hasta) {
+    const d0 = new Date(desde + 'T00:00:00');
+    const d1 = new Date(hasta + 'T00:00:00');
+    const nDias = Math.min(Math.round((d1 - d0) / 86400000) + 1, 60);
+    diasArr = Array.from({length: nDias}, (_, i) => {
+      const d = new Date(d0); d.setDate(d0.getDate() + i); return d;
+    });
+    document.getElementById('lineChartSubtitle').textContent =
+      `Empresas nuevas vs. activadas — ${desde} al ${hasta}`;
+  } else {
+    diasArr = Array.from({length:14}, (_, i) => {
+      const d = new Date(TODAY); d.setDate(TODAY.getDate() - (13 - i)); return d;
+    });
+    document.getElementById('lineChartSubtitle').textContent =
+      'Empresas nuevas vs. activadas con interés real — últimas 2 semanas';
+  }
+
+  const empresasNuevasCounts = diasArr.map(d => rawData.filter(r => {
+    const ca = getFecha(r, ['created_at', 'created at']);
+    return ca && midnight(ca).getTime() === d.getTime();
+  }).length);
+
+  const activadasCounts = diasArr.map(d => rawData.filter(r => {
+    const fa = getFecha(r, ['fecha_activacion', 'fecha_de_activacion', 'fecha de activacion']);
+    if (!fa) return false;
+    return midnight(fa).getTime() === d.getTime();
+  }).length);
+
+  destroyChart('line');
+  charts['line'] = new Chart(document.getElementById('chartLine').getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: diasArr.map(fmtShort),
+      datasets: [
+        {
+          label: 'Empresas nuevas',
+          data: empresasNuevasCounts,
+          borderColor: '#2563EB',
+          backgroundColor: 'rgba(37,99,235,.08)',
+          borderWidth: 2.5,
+          pointRadius: diasArr.length > 30 ? 2 : 4,
+          pointBackgroundColor: '#2563EB',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: .4, fill: true
+        },
+        {
+          label: 'Activadas',
+          data: activadasCounts,
+          borderColor: '#16A34A',
+          backgroundColor: 'rgba(22,163,74,.08)',
+          borderWidth: 2.5,
+          pointRadius: diasArr.length > 30 ? 2 : 4,
+          pointBackgroundColor: '#16A34A',
+          pointBorderColor: '#fff',
+          pointBorderWidth: 2,
+          tension: .4, fill: true
+        }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true, position: 'top', align: 'end',
+          labels: { boxWidth: 12, boxHeight: 2, font: { size: 11 }, color: '#475569', padding: 12 }
+        },
+        tooltip
+      },
+      scales: {
+        x: { ...scaleNogrid, ticks: { ...scaleNogrid.ticks, maxTicksLimit: 7 } },
+        y: { ...scaleBase, beginAtZero: true, ticks: { ...scaleBase.ticks, stepSize: 1 } }
+      }
+    }
+  });
+
+  /* ── BAR: ORIGEN — empresas nuevas del período por fuente ── */
+  resetCanvas('origen', 'chartOrigen');
+  const origenMap = {};
+  empresasNuevasPeriodo.forEach(r => {
+    const o = (getCol(r, ['origen']) || '').trim() || 'Sin especificar';
+    origenMap[o] = (origenMap[o] || 0) + 1;
+  });
+  const origenSorted = Object.entries(origenMap).sort((a,b) => b[1]-a[1]);
+  const blueShades = ['#1D4ED8','#2563EB','#3B82F6','#60A5FA','#93C5FD','#BFDBFE','#DBEAFE'];
+
+  destroyChart('origen');
+  if (origenSorted.length > 0) {
+    charts['origen'] = new Chart(document.getElementById('chartOrigen').getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: origenSorted.map(x=>x[0]),
+        datasets: [{
+          data: origenSorted.map(x=>x[1]),
+          backgroundColor: blueShades.slice(0, origenSorted.length),
+          borderRadius: 5, borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        indexAxis: 'y',
+        plugins: { legend:{display:false}, tooltip },
+        scales: {
+          x: { ...scaleBase, beginAtZero:true, ticks:{...scaleBase.ticks, stepSize:1} },
+          y: { ...scaleNogrid, ticks:{color:'#475569', font:{size:11}} }
+        }
+      }
+    });
+  } else {
+    getChartWrap('origen').innerHTML =
+      '<div class="empty-chart">Sin empresas nuevas en el período</div>';
+  }
+
+  /* ── H-BAR: PIPELINE — etapas activas (estado actual, sin filtro de fecha) ── */
+  const etapaColor = {
+    'En conversacion': '#2563EB',
+    'Presupuesto':     '#D97706',
+    'Negociacion':     '#7C3AED',
+    'Catálogo enviado':'#EA580C',
+    'Pedido':          '#16A34A'
+  };
+  const etapaLabels = ['En conversación', 'Presupuesto', 'Negociación', 'Catálogo enviado', 'Pedido'];
+  const etapaCounts = ETAPAS_ACTIVAS.map(e => {
+    const n = norm(e);
+    return pipelineActivo.filter(r => norm(getCol(r, ['etapa'])) === n).length;
+  });
+  const maxEtapa = Math.max(...etapaCounts, 1);
+
+  destroyChart('pipeline');
+  charts['pipeline'] = new Chart(document.getElementById('chartPipeline').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: etapaLabels,
+      datasets: [{
+        data: etapaCounts,
+        backgroundColor: ETAPAS_ACTIVAS.map(e => etapaColor[e] + 'CC'),
+        borderColor:     ETAPAS_ACTIVAS.map(e => etapaColor[e]),
+        borderWidth: 2,
+        borderRadius: 6, borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: { legend: { display: false }, tooltip },
+      scales: {
+        x: { ...scaleBase, beginAtZero: true, max: maxEtapa + 1, ticks: { ...scaleBase.ticks, stepSize: 1 } },
+        y: { ...scaleNogrid, ticks: { color: '#334155', font: { size: 11, weight: '500' } } }
+      }
+    }
+  });
+
+  /* ── DONUT: ORIGEN DE CIERRES GANADOS — ganadasPeriodo ── */
+  resetCanvas('ganados', 'chartGanados');
+  destroyChart('ganados');
+
+  const ganadoOrigen = {};
+  ganadasPeriodo.forEach(r => {
+    const o = (getCol(r, ['origen']) || '').trim() || 'Sin especificar';
+    ganadoOrigen[o] = (ganadoOrigen[o] || 0) + 1;
+  });
+  const greenShades = ['#2563EB','#16A34A','#D97706','#7C3AED','#EA580C','#0284C7','#DB2777'];
+  const gLabels = Object.keys(ganadoOrigen);
+  const gValues = Object.values(ganadoOrigen);
+
+  if (gValues.length > 0) {
+    charts['ganados'] = new Chart(document.getElementById('chartGanados').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: gLabels,
+        datasets: [{
+          data: gValues,
+          backgroundColor: greenShades.slice(0, gLabels.length),
+          borderColor: '#fff', borderWidth: 3,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          tooltip,
+          legend: {
+            display: true, position: 'right',
+            labels: { color: '#475569', font:{size:11}, padding:8, boxWidth:10, usePointStyle:true, pointStyle:'circle' }
+          }
+        }
+      }
+    });
+  } else {
+    getChartWrap('ganados').innerHTML =
+      '<div class="empty-chart">Sin cierres ganados en el período</div>';
+  }
+
+  /* ── DOUGHNUT: MOTIVOS PÉRDIDA — perdidasPeriodo ── */
+  resetCanvas('perdidas', 'chartPerdidas');
+  destroyChart('perdidas');
+
+  const motivoMap = {};
+  perdidasPeriodo.forEach(r => {
+    const razon = getCol(r, ['razon_perdida', 'razon_de_perdida', 'razon perdida', 'razon de perdida']);
+    if (!razon || !razon.trim()) return;
+    const m = razon.trim().toLowerCase();
+    motivoMap[m] = (motivoMap[m] || 0) + 1;
+  });
+  const motivoSorted = Object.entries(motivoMap).sort((a,b) => b[1]-a[1]);
+
+  if (motivoSorted.length > 0) {
+    const motivoTotal = motivoSorted.reduce((s, x) => s + x[1], 0);
+    const redShades = ['#16A34A','#2563EB','#EA580C','#DC2626','#059669','#1D4ED8','#F97316'];
+    charts['perdidas'] = new Chart(document.getElementById('chartPerdidas').getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: motivoSorted.map(x => x[0]),
+        datasets: [{
+          data: motivoSorted.map(x => x[1]),
+          backgroundColor: redShades.slice(0, motivoSorted.length),
+          borderColor: '#fff', borderWidth: 3,
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        cutout: '62%',
+        plugins: {
+          legend: {
+            display: true, position: 'right',
+            labels: { color: '#475569', font:{size:11}, padding:8, boxWidth:10, usePointStyle:true, pointStyle:'circle' }
+          },
+          tooltip: {
+            ...tooltip,
+            callbacks: {
+              label: ctx => {
+                const pct = ((ctx.parsed / motivoTotal) * 100).toFixed(1);
+                return `  ${ctx.label}: ${ctx.parsed} (${pct}%)`;
+              }
+            }
+          }
+        }
+      }
+    });
+  } else {
+    getChartWrap('perdidas').innerHTML =
+      '<div class="empty-chart">Sin pérdidas registradas en el período</div>';
+  }
+
+  /* ── BAR: VELOCIDAD DE CIERRE ── */
+  resetCanvas('velocidad', 'chartVelocidad');
+  destroyChart('velocidad');
+
+  const gDias  = avgDias(ganadasPeriodo)  ?? 0;
+  const pDias  = avgDias(perdidasPeriodo) ?? 0;
+  const nrDias = avgDias(noRespondeLeads) ?? 0;
+
+  const velGroups = [
+    { label: 'Ganados',       value: gDias,  color: '#16A34A' },
+    { label: 'Perdidos',      value: pDias,  color: '#DC2626' },
+    { label: 'Sin respuesta', value: nrDias, color: '#D97706' },
+  ];
+
+  const topLabelsPlugin = {
+    id: 'topLabels',
+    afterDatasetsDraw(chart) {
+      const { ctx, data } = chart;
+      ctx.save();
+      ctx.font = '600 13px DM Sans, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      data.datasets.forEach((ds, i) => {
+        chart.getDatasetMeta(i).data.forEach((bar, j) => {
+          const v = ds.data[j];
+          ctx.fillStyle = velGroups[j].color;
+          ctx.fillText(`${v}d`, bar.x, bar.y - 6);
+        });
+      });
+      ctx.restore();
+    }
+  };
+
+  charts['velocidad'] = new Chart(
+    document.getElementById('chartVelocidad').getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: velGroups.map(g => g.label),
+      datasets: [{
+        data:            velGroups.map(g => g.value),
+        backgroundColor: velGroups.map(g => g.color + '22'),
+        borderColor:     velGroups.map(g => g.color),
+        borderWidth: 2,
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          ...tooltip,
+          callbacks: { label: ctx => `  ${ctx.parsed.y} días promedio` }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: '#334155', font: { size: 13, weight: '600' } }
+        },
+        y: {
+          ...scaleBase,
+          beginAtZero: true,
+          ticks: { ...scaleBase.ticks, callback: v => `${v}d` }
+        }
+      }
+    },
+    plugins: [topLabelsPlugin]
+  });
+
+  /* ── SUBTITLE DINÁMICO DE VELOCIDAD ── */
+  const velSubEl = document.getElementById('velocidadSubtitle');
+  if (velSubEl) {
+    if (gDias > 0 && pDias > 0) {
+      velSubEl.textContent = gDias > pDias
+        ? `Ganados ${gDias}d · Perdidos ${pDias}d · Sin respuesta ${nrDias}d`
+        : `Ganados ${gDias}d · Perdidos ${pDias}d · Sin respuesta ${nrDias}d`;
+    } else {
+      velSubEl.textContent = 'Días promedio entre creación y última actividad';
+    }
+  }
+
+  /* ── TAB 1: SEGUIMIENTOS ACTIVOS ── */
+  const tab1El = document.getElementById('tabSeguimientos');
+  const count1El = document.getElementById('countSeguimientos');
+  count1El.textContent = vencidos.length;
+  const tabBtn1 = document.querySelector('[data-tab="seguimientos"]');
+  if (vencidos.length > 5) tabBtn1.dataset.urgency = 'danger';
+  else if (vencidos.length > 2) tabBtn1.dataset.urgency = 'warn';
+  else delete tabBtn1.dataset.urgency;
+
+  if (vencidos.length === 0) {
+    tab1El.innerHTML = '<div style="padding:20px 22px;color:var(--green-600);font-size:13px;font-weight:500">✓ No hay seguimientos pendientes — todos al día</div>';
+  } else {
+    tab1El.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Empresa</th><th>Contacto</th><th>Etapa</th>
+          <th style="text-align:center">Responsable</th>
+          <th>Últ. actividad</th>
+          <th style="text-align:center">Días</th>
+          <th>Acción sugerida</th>
+          <th style="text-align:center">Abrir</th>
+        </tr></thead>
+        <tbody>
+          ${vencidos.map(({ r, dias, etapaN }) => {
+            const ua = getFecha(r, ['ultima_actividad', 'ultima actividad']);
+            const link = r._sheetRow
+              ? `${SHEET_EDIT_URL}#gid=0&range=A${r._sheetRow}:P${r._sheetRow}`
+              : SHEET_EDIT_URL;
+            const diasCls = dias >= 5 ? 'danger' : 'warn';
+            return `<tr>
+              <td class="td-empresa">${getCol(r,['empresa'])||'—'}</td>
+              <td>${getCol(r,['contacto'])||'—'}</td>
+              <td>${stageBadge(getCol(r,['etapa']))}</td>
+              <td style="text-align:center">${ownerHTML(getCol(r,['owner','responsable']))}</td>
+              <td>${ua ? fmtShort(ua) : '—'}</td>
+              <td style="text-align:center"><span class="dias-pill ${diasCls}">${dias}d</span></td>
+              <td style="color:var(--text-2);font-size:12px">${STAGE_ACCION[etapaN]||'—'}</td>
+              <td style="text-align:center"><a href="${link}" target="_blank" class="open-btn">Abrir</a></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  /* ── TAB 2: CONTACTADOS SIN RESPUESTA ── */
+
+  const tab2El = document.getElementById('tabContactados');
+  const count2El = document.getElementById('countContactados');
+  count2El.textContent = sinRespuesta.length;
+
+  if (sinRespuesta.length === 0) {
+    tab2El.innerHTML = '<div style="padding:20px 22px;color:var(--green-600);font-size:13px;font-weight:500">✓ Sin contactos pendientes de seguimiento</div>';
+  } else {
+    tab2El.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Empresa</th><th>Contacto</th><th>Etapa</th>
+          <th style="text-align:center">Responsable</th>
+          <th>Últ. actividad</th>
+          <th style="text-align:center">Días</th>
+          <th>Recontactado</th>
+          <th>Acción sugerida</th>
+          <th style="text-align:center">Abrir</th>
+        </tr></thead>
+        <tbody>
+          ${sinRespuesta.map(r => {
+            const ua = getFecha(r, ['ultima_actividad','ultima actividad']);
+            const dias = ua ? diffDays(ua, TODAY) : 0;
+            const recon = norm(getCol(r,['recontactado'])||'');
+            const accion = recon === 'si' ? 'Pasar a no responde' : 'Recontactar';
+            const link = r._sheetRow
+              ? `${SHEET_EDIT_URL}#gid=0&range=A${r._sheetRow}:P${r._sheetRow}`
+              : SHEET_EDIT_URL;
+            const diasCls = dias >= 14 ? 'danger' : 'warn';
+            const reconLabel = recon === 'si' ? 'Sí' : recon === 'no' ? 'No' : '—';
+            return `<tr>
+              <td class="td-empresa">${getCol(r,['empresa'])||'—'}</td>
+              <td>${getCol(r,['contacto'])||'—'}</td>
+              <td>${stageBadge(getCol(r,['etapa']))}</td>
+              <td style="text-align:center">${ownerHTML(getCol(r,['owner','responsable']))}</td>
+              <td>${ua ? fmtShort(ua) : '—'}</td>
+              <td style="text-align:center"><span class="dias-pill ${diasCls}">${dias}d</span></td>
+              <td style="font-size:12px">${reconLabel}</td>
+              <td style="color:var(--text-2);font-size:12px">${accion}</td>
+              <td style="text-align:center"><a href="${link}" target="_blank" class="open-btn">Abrir</a></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  /* ── TAB 3: RECONTACTOS COMERCIALES ── */
+  function accionRecontacto(resultado, razon) {
+    const res = norm(resultado);
+    const rn  = norm(razon);
+    if (res === 'ganado') return 'Posventa / consultar reposición';
+    if (rn.includes('precio'))        return 'Reabrir con propuesta ajustada';
+    if (rn.includes('stock'))         return 'Recontactar por disponibilidad';
+    if (rn.includes('plazo') || rn.includes('timing')) return 'Recontactar por nueva planificación';
+    if (rn.includes('competencia'))   return 'Ofrecer alternativa Pampero';
+    if (rn.includes('necesidad'))     return 'Consultar si surgió necesidad';
+    return 'Reabrir conversación';
+  }
+
+  const recontactos = rawData.filter(r => {
+    const res = norm(getCol(r,['resultado']));
+    if (res !== 'ganado' && res !== 'perdido') return false;
+    const ua = getFecha(r, ['ultima_actividad','ultima actividad']);
+    if (!ua) return false;
+    return diffDays(ua, TODAY) > 90;
+  });
+
+  const tab3El = document.getElementById('tabRecontactos');
+  const count3El = document.getElementById('countRecontactos');
+  count3El.textContent = recontactos.length;
+
+  if (recontactos.length === 0) {
+    tab3El.innerHTML = '<div style="padding:20px 22px;color:var(--text-3);font-size:13px">Sin recontactos comerciales por ahora. Esta tabla se activa con clientes ganados/perdidos con más de 90 días desde la última actividad.</div>';
+  } else {
+    tab3El.innerHTML = `
+      <table>
+        <thead><tr>
+          <th>Empresa</th><th>Contacto</th><th>Resultado</th>
+          <th>Razón pérdida</th>
+          <th>Últ. actividad</th>
+          <th style="text-align:center">Días</th>
+          <th>Acción sugerida</th>
+          <th style="text-align:center">Abrir</th>
+        </tr></thead>
+        <tbody>
+          ${recontactos.map(r => {
+            const ua = getFecha(r, ['ultima_actividad','ultima actividad']);
+            const dias = ua ? diffDays(ua, TODAY) : 0;
+            const resultado = getCol(r,['resultado']);
+            const razon = getCol(r,['razon_perdida','razon_de_perdida','razon perdida','razon de perdida']);
+            const link = r._sheetRow
+              ? `${SHEET_EDIT_URL}#gid=0&range=A${r._sheetRow}:P${r._sheetRow}`
+              : SHEET_EDIT_URL;
+            const resNorm = norm(resultado);
+            const resBadge = resNorm === 'ganado'
+              ? `<span class="badge b-pedi"><span class="dot"></span>Ganado</span>`
+              : `<span class="badge b-nego"><span class="dot"></span>Perdido</span>`;
+            return `<tr>
+              <td class="td-empresa">${getCol(r,['empresa'])||'—'}</td>
+              <td>${getCol(r,['contacto'])||'—'}</td>
+              <td>${resBadge}</td>
+              <td style="font-size:12px;color:var(--text-2)">${razon||'—'}</td>
+              <td>${ua ? fmtShort(ua) : '—'}</td>
+              <td style="text-align:center"><span class="dias-pill danger">${dias}d</span></td>
+              <td style="color:var(--text-2);font-size:12px">${accionRecontacto(resultado, razon)}</td>
+              <td style="text-align:center"><a href="${link}" target="_blank" class="open-btn">Abrir</a></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>`;
+  }
+
+  function stageBadge(etapa) {
+    const n = norm(etapa);
+    const map = {
+      'en conversacion': ['b-conv', 'En conversación'],
+      'presupuesto':     ['b-pres', 'Presupuesto'],
+      'negociacion':     ['b-nego', 'Negociación'],
+      'catalogo enviado':['b-cata', 'Catálogo enviado'],
+      'contactado':      ['b-conv', 'Contactado'],
+      'pedido':          ['b-pedi', 'Pedido'],
+    };
+    const [cls, label] = map[n] || ['b-conv', etapa];
+    return `<span class="badge ${cls}"><span class="dot"></span>${label}</span>`;
+  }
+
+  function ownerHTML(owner) {
+    const o = norm(owner || '');
+    if (o.includes('nico')) return `<span class="avatar av-nico" title="Nicolás">N</span>`;
+    if (o.includes('sofi')) return `<span class="avatar av-sofi" title="Sofi">S</span>`;
+    return `<span class="avatar av-def" title="${owner}">${(owner||'?').charAt(0).toUpperCase()}</span>`;
+  }
+
+  /* ── timestamp ── */
+  const now = new Date();
+  document.getElementById('lastUpdated').textContent =
+    `Actualizado ${now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}`;
+}
+
+/* ── FILTRO MENSUAL ─────────────────────────── */
+function buildMesOptions() {
+  const sel = document.getElementById('selMes');
+  const hoy = new Date();
+  for (let i = 0; i < 18; i++) {
+    const d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+    const opt = document.createElement('option');
+    opt.value = `${d.getFullYear()},${d.getMonth()}`;
+    const label = d.toLocaleDateString('es-AR', { month: 'long', year: 'numeric' });
+    opt.textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    sel.appendChild(opt);
+  }
+}
+
+function setMesFiltro() {
+  const val = document.getElementById('selMes').value;
+  if (!val) return;
+  const [year, monthIdx] = val.split(',').map(Number);
+  const primerDia = new Date(year, monthIdx, 1);
+  const ultimoDia = new Date(year, monthIdx + 1, 0);
+  document.getElementById('fechaDesde').value = toISO(primerDia);
+  document.getElementById('fechaHasta').value = toISO(ultimoDia);
+  ['btnHoy','btnSemana','btnMes','btnTodo'].forEach(id =>
+    document.getElementById(id).classList.remove('active'));
+  buildWithFilter();
+}
+
+/* ── TAB SWITCH ─────────────────────────────── */
+function switchTab(name) {
+  ['seguimientos','contactados','recontactos'].forEach(t => {
+    const pane = document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1));
+    const btn  = document.querySelector(`[data-tab="${t}"]`);
+    if (t === name) {
+      pane.classList.remove('tab-hidden');
+      btn.classList.add('active');
+    } else {
+      pane.classList.add('tab-hidden');
+      btn.classList.remove('active');
+    }
+  });
+}
+
+/* ── ICONS ──────────────────────────────────── */
+function iconPhone() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.07 12 19.79 19.79 0 0 1 1 3.18 2 2 0 0 1 2.96 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.09 8.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>`;
+}
+function iconCheck() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+}
+function iconTrophy() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`;
+}
+function iconPipe() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`;
+}
+function iconClock() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+}
+function iconTarget() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`;
+}
+function iconDoc() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>`;
+}
+function iconAlert() {
+  return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
+}
+
+/* ── LOAD DATA (JSONP — funciona desde file://) ── */
+function loadData() {
+  document.getElementById('kpiGridPrimary').innerHTML =
+    '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div> Conectando con Google Sheets…</div>';
+  document.getElementById('kpiGridSecondary').innerHTML = '';
+
+  const badge = document.getElementById('sourceBadge');
+  const cbName = '__gviz_cb_' + Date.now();
+  const script = document.createElement('script');
+  const timer = setTimeout(() => {
+    cleanup();
+    showError('Timeout: Google Sheets no respondió en 10s');
+  }, 10000);
+
+  function cleanup() {
+    clearTimeout(timer);
+    delete window[cbName];
+    if (script.parentNode) script.parentNode.removeChild(script);
+  }
+
+  window[cbName] = function(resp) {
+    cleanup();
+    if (resp.status === 'error') {
+      showError('Google Sheets rechazó la solicitud. Verificá que el sheet esté compartido como "Cualquiera con el enlace → Lector".');
+      return;
+    }
+    const table = resp.table;
+    // Normaliza nombres de columna: minúsculas + sin tildes + espacios→guión_bajo
+    const cols = table.cols.map(c => {
+      return (c.label || c.id)
+        .trim()
+        .toLowerCase()
+        .normalize('NFD').replace(/[̀-ͯ]/g, '')
+        .replace(/\s+/g, '_');
+    });
+    const rows = table.rows.map((r, index) => {
+      const obj = {};
+      cols.forEach((col, i) => {
+        const cell = r.c && r.c[i];
+        // Las fechas de gviz vienen como objetos con .v = "Date(año,mes,día)"
+        let val = '';
+        if (cell && cell.v != null) {
+          val = typeof cell.v === 'string' ? cell.v.trim() : String(cell.v).trim();
+        }
+        obj[col] = val;
+      });
+      obj._sheetRow = index + 2;
+      return obj;
+    }).filter(r => r.lead_id || r.empresa);
+
+    if (!rows.length) { showError('El sheet no tiene filas de datos'); return; }
+
+    badge.textContent = '● Google Sheets';
+    badge.className = 'source-badge badge-live';
+    const now = new Date();
+    document.getElementById('lastUpdated').textContent =
+      `Actualizado ${now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'})}`;
+    rawData = rows;
+    buildWithFilter();
+  };
+
+  script.src = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json;responseHandler:${cbName}&sheet=${encodeURIComponent(SHEET_NAME)}&headers=1`;
+  script.onerror = () => { cleanup(); showError('No se pudo cargar el script de Google (¿sin internet?)'); };
+  document.head.appendChild(script);
+
+  function showError(msg) {
+    badge.textContent = '● Sin conexión';
+    badge.className = 'source-badge badge-error';
+    document.getElementById('lastUpdated').textContent = 'Error al cargar';
+    document.getElementById('kpiGridPrimary').innerHTML = `
+      <div class="error-state" style="grid-column:1/-1">
+        <strong>No se pudo conectar con Google Sheets</strong>
+        ${msg}<br><br>
+        Usando datos de demostración…
+      </div>`;
+    // Fallback a demo data
+    rawData = getMockData();
+    buildWithFilter();
+  }
+}
+
+/* ── INIT ───────────────────────────────────── */
+buildMesOptions();
+loadData();
+</script>
+</body>
+</html>
