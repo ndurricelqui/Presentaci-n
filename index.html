@@ -480,6 +480,22 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 // ============================================================
 function norm(s) { return (s || '').toString().trim().toUpperCase().replace(/\s{2,}/g, ' '); }
 
+function normalizarColor(valor) {
+  const s = norm(valor);
+  if (!s) return '';
+  if (s.includes('P4') || s.includes('GRIS MELANGE')) return 'P4 GRIS MELANGE';
+  if (s.includes('C4') || s.includes('AZUL MARINO'))  return 'C4 AZUL MARINO';
+  if (s.includes('C6') || s.includes('AZUL JEAN'))    return 'C6 AZUL JEAN';
+  if (s.includes('H2') || s.includes('NEGRO'))        return 'H2 NEGRO';
+  if (s.includes('H1') || s.includes('BLANCO'))       return 'H1 BLANCO';
+  if (s.includes('H3') || s.includes('GRIS'))         return 'H3 GRIS';
+  if (s.includes('E1') || s.includes('VERDE'))        return 'E1 VERDE';
+  if (s.includes('I1') || s.includes('CELESTE'))      return 'I1 CELESTE';
+  if (s.includes('G1') || s.includes('BEIGE'))        return 'G1 BEIGE';
+  if (s.includes('B1') || s.includes('ROJO'))         return 'B1 ROJO';
+  return s;
+}
+
 function normalizarArticulo(nombre) {
   let n = (nombre || '').toString().trim().toUpperCase().replace(/\s{2,}/g, ' ');
 
@@ -654,7 +670,7 @@ function processRaw(raw) {
       articulo: articuloRaw,
       articuloNorm,
       codigo: norm(r.cd || r.codigo || ''),
-      color: norm(r.cl || r.color || ''),
+      color: normalizarColor(r.cl || r.color || ''),
       talle,
       cantidad: parseFloat(r.ca !== undefined ? r.ca : (r.cantidad || 0)),
       monto: parseFloat(r.mo !== undefined ? r.mo : (r.monto || 0))
@@ -665,33 +681,124 @@ function processRaw(raw) {
 // ============================================================
 // STOCK — CARGA Y PROCESAMIENTO
 // ============================================================
+const GH_STOCK_BASE = 'https://raw.githubusercontent.com/ndurricelqui/Presentaci-n/refs/heads/master/Reporte%20Stock.csv';
+const GH_STOCK_TOKEN_KEY = 'gh_stock_token';
+if (!localStorage.getItem(GH_STOCK_TOKEN_KEY)) {
+  localStorage.setItem(GH_STOCK_TOKEN_KEY, 'GHSAT0AAAAAAD4VNNJDTKKGY5THSSNTS5OG2P7IYGA');
+}
+
+function _buildStockURL() {
+  const t = localStorage.getItem(GH_STOCK_TOKEN_KEY) || '';
+  return t ? GH_STOCK_BASE + '?token=' + t : GH_STOCK_BASE;
+}
+
+function promptStockToken() {
+  const t = prompt('Token de GitHub expirado.\nPegá el nuevo token (parte después de ?token= en la URL Raw de GitHub):');
+  if (t && t.trim()) {
+    localStorage.setItem(GH_STOCK_TOKEN_KEY, t.trim());
+    initStockData();
+  }
+}
+
+function _parseStockText(text) {
+  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l => l.trim());
+  if (lines.length < 2) throw new Error('vacío');
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const rows = lines.map(l => l.split(sep).map(c => c.trim().replace(/^"|"$/g, '')));
+  const result = processStockRaw(rows);
+  if (!result.length) throw new Error('sin columnas reconocibles');
+  return result;
+}
+
 function initStockData() {
   if (window.STOCK_DATA && window.STOCK_DATA.length) {
     stockData = processStockRaw(window.STOCK_DATA);
     _updateStockUI(stockData.length + ' SKUs');
-  } else {
-    stockData = [];
-    _updateStockUI(null);
+    return;
   }
+  fetch(_buildStockURL())
+    .then(r => {
+      if (r.status === 401 || r.status === 403) throw new Error('token');
+      if (!r.ok) throw new Error('no encontrado');
+      return r.text();
+    })
+    .then(text => {
+      stockData = _parseStockText(text);
+      _updateStockUI(stockData.length + ' SKUs');
+      if (filtered.length) renderStockKPIsResumen(filtered);
+      if (selectedCompraProveedor) {
+        const provData = filtered.filter(r => r.proveedor === selectedCompraProveedor);
+        renderBloqueBArticulos(provData, sumF(provData,'monto'), sumF(filtered,'monto'));
+        if (selectedCompraArticulo) renderBloqueCAnalisis();
+      }
+    })
+    .catch(err => {
+      stockData = [];
+      if (err.message === 'token') {
+        _updateStockUI(null, true);
+      } else {
+        _updateStockUI(null);
+      }
+    });
 }
 
-function _updateStockUI(msg) {
+function _updateStockUI(msg, tokenExpired) {
   const badge = document.getElementById('stock-hdr-badge');
   const statusEl = document.getElementById('stock-load-status');
-  if (badge) badge.textContent = msg ? '📦 Stock: ' + msg : '📦 Stock: no cargado';
+  if (badge) {
+    if (tokenExpired) {
+      badge.textContent = '🔑 Token expirado — clic para renovar';
+      badge.style.cursor = 'pointer';
+      badge.style.background = 'rgba(220,38,38,.5)';
+      badge.onclick = promptStockToken;
+    } else {
+      badge.textContent = msg ? '📦 Stock: ' + msg : '📦 Stock: no cargado';
+      badge.style.cursor = '';
+      badge.style.background = 'rgba(255,255,255,.1)';
+      badge.onclick = null;
+    }
+  }
   if (statusEl) statusEl.textContent = msg ? 'Stock: ' + msg : 'Stock: no cargado';
 }
 
 function detectStockCols(headers) {
   const h = headers.map(x => (x || '').toString().toLowerCase().trim());
-  const find = (...opts) => { for (const o of opts) { const i = h.findIndex(x => x.includes(o)); if (i >= 0) return i; } return -1; };
-  return {
-    provIdx:  find('proveedor', 'marca', 'nombre prov'),
-    artIdx:   find('articulo', 'artículo', 'descripcion', 'descripción', 'producto'),
-    colorIdx: find('color'),
-    talleIdx: find('talle', 'tamaño'),
-    stockIdx: find('stock', 'disponible', 'existencia', 'cantidad')
-  };
+  const findExact    = (...opts) => { for (const o of opts) { const i = h.findIndex(x => x === o);          if (i >= 0) return i; } return -1; };
+  const findIncludes = (...opts) => { for (const o of opts) { const i = h.findIndex(x => x.includes(o));   if (i >= 0) return i; } return -1; };
+
+  // proveedor: exacto "nombre" primero, luego "proveedor"/"marca"/"nombre prov"
+  const provIdx = (() => {
+    const i = findExact('nombre'); if (i >= 0) return i;
+    return findIncludes('proveedor', 'marca', 'nombre prov');
+  })();
+
+  // articulo: "artículo descripción" primero; NO usar "artículo" solo (es código)
+  const artIdx = (() => {
+    const i = findExact('artículo descripción', 'articulo descripcion', 'artículo descripcion', 'articulo descripción');
+    if (i >= 0) return i;
+    return findIncludes('descripción', 'descripcion', 'producto', 'articulo');
+  })();
+
+  // color código: columna exacta "color"
+  const colorIdx = findExact('color');
+
+  // color descripción: variantes de nombre largo
+  const colorDescIdx = (() => {
+    const i = findExact('color descripción', 'color descripcion', 'descripción color', 'descripcion color');
+    if (i >= 0) return i;
+    return findIncludes('descripción color', 'descripcion color', 'color descripcion', 'color descripción');
+  })();
+
+  // talle
+  const talleIdx = findIncludes('talle', 'tamaño');
+
+  // stock: "cantidad" primero
+  const stockIdx = (() => {
+    const i = findExact('cantidad'); if (i >= 0) return i;
+    return findIncludes('stock', 'disponible', 'existencia');
+  })();
+
+  return { provIdx, artIdx, colorIdx, colorDescIdx, talleIdx, stockIdx };
 }
 
 function processStockRaw(raw) {
@@ -702,7 +809,11 @@ function processStockRaw(raw) {
     return raw.map(r => {
       const provRaw = norm(r.proveedor || r.pr || '');
       const artRaw  = norm(r.articulo  || r.ar || '');
-      const colorR  = norm(r.color     || r.cl || '');
+      const colorRaw = [
+        r.color || r.cl || '',
+        r['color descripcion'] || r['color descripción'] || r['Color descripción'] || r.colorDescripcion || ''
+      ].filter(Boolean).join(' ');
+      const colorR = normalizarColor(colorRaw);
       const talleR  = normalizarTalle(norm(r.talle || r.ta || ''));
       const stk     = parseFloat(r.stock !== undefined ? r.stock : (r.cantidad || 0)) || 0;
       const articuloNorm = provRaw.includes('MACATA') ? normalizarArticuloMacata(artRaw) : normalizarArticulo(artRaw);
@@ -712,17 +823,24 @@ function processStockRaw(raw) {
   // CSV parseado: raw es array de arrays; fila 0 = headers
   const cols = detectStockCols(raw[0]);
   if (cols.stockIdx < 0) return [];
+  console.log('detectStockCols resultado:', cols, '| headers:', raw[0]);
   const result = [];
   for (let i = 1; i < raw.length; i++) {
     const row = raw[i];
     const provRaw = cols.provIdx  >= 0 ? norm(row[cols.provIdx])  : '';
     const artRaw  = cols.artIdx   >= 0 ? norm(row[cols.artIdx])   : '';
-    const colorR  = cols.colorIdx >= 0 ? norm(row[cols.colorIdx]) : '';
+    const colorRaw = [
+      cols.colorIdx     >= 0 ? row[cols.colorIdx]     : '',
+      cols.colorDescIdx >= 0 ? row[cols.colorDescIdx] : ''
+    ].filter(Boolean).join(' ');
+    const colorR = normalizarColor(colorRaw);
     const talleR  = cols.talleIdx >= 0 ? normalizarTalle(norm(row[cols.talleIdx])) : 'U';
     const stk     = parseFloat((row[cols.stockIdx] || '0').toString().replace(',', '.')) || 0;
     const articuloNorm = provRaw.includes('MACATA') ? normalizarArticuloMacata(artRaw) : normalizarArticulo(artRaw);
     result.push({ proveedor: provRaw, articulo: artRaw, articuloNorm, color: colorR, talle: talleR, stock: stk });
   }
+  console.log('Stock cargado:', result.length, 'registros');
+  if (result.length) console.log('Ejemplo stock procesado:', result[0]);
   return result;
 }
 
