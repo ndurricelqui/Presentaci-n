@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -114,6 +114,8 @@ tr:hover td{background:#f5f8ff}
 .loader-btn{display:inline-block;padding:10px 24px;background:var(--navy);color:#fff;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer}
 .loader-btn:hover{background:var(--navy2)}
 .err-msg{background:#fee2e2;color:#b91c1c;padding:10px 16px;border-radius:8px;font-size:13px;margin-top:14px;display:none}
+.stock-dz{border:2px dashed var(--border);border-radius:12px;padding:30px 20px;text-align:center;cursor:pointer;background:#fff;margin-bottom:16px;transition:border-color .15s,background .15s}
+.stock-dz:hover,.stock-dz.over{border-color:var(--orange);background:#fff9f5}
 
 /* TABLE SEARCH */
 .tbl-search{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
@@ -199,10 +201,6 @@ td.presup-col{color:var(--blue);font-weight:700}
   <div id="last-update">—</div>
   <div id="stock-hdr" style="display:flex;align-items:center;gap:6px;flex-shrink:0">
     <span id="stock-hdr-badge" style="font-size:10px;padding:3px 10px;background:rgba(255,255,255,.1);border-radius:20px;white-space:nowrap">📦 Stock: no cargado</span>
-    <label style="font-size:10px;padding:3px 10px;background:rgba(232,93,4,.35);border-radius:20px;cursor:pointer;white-space:nowrap;color:#fff" title="Cargar CSV de stock exportado desde Excel">
-      ⬆ Cargar stock CSV
-      <input type="file" id="stock-csv-input" accept=".csv" style="display:none" onchange="loadStockCSVFile(this.files[0])">
-    </label>
   </div>
 </header>
 
@@ -681,82 +679,19 @@ function processRaw(raw) {
 // ============================================================
 // STOCK — CARGA Y PROCESAMIENTO
 // ============================================================
-const GH_STOCK_BASE = 'https://raw.githubusercontent.com/ndurricelqui/Presentaci-n/refs/heads/master/Reporte%20Stock.csv';
-const GH_STOCK_TOKEN_KEY = 'gh_stock_token';
-if (!localStorage.getItem(GH_STOCK_TOKEN_KEY)) {
-  localStorage.setItem(GH_STOCK_TOKEN_KEY, 'GHSAT0AAAAAAD4VNNJDTKKGY5THSSNTS5OG2P7IYGA');
-}
-
-function _buildStockURL() {
-  const t = localStorage.getItem(GH_STOCK_TOKEN_KEY) || '';
-  return t ? GH_STOCK_BASE + '?token=' + t : GH_STOCK_BASE;
-}
-
-function promptStockToken() {
-  const t = prompt('Token de GitHub expirado.\nPegá el nuevo token (parte después de ?token= en la URL Raw de GitHub):');
-  if (t && t.trim()) {
-    localStorage.setItem(GH_STOCK_TOKEN_KEY, t.trim());
-    initStockData();
-  }
-}
-
-function _parseStockText(text) {
-  const lines = text.replace(/\r\n/g,'\n').replace(/\r/g,'\n').split('\n').filter(l => l.trim());
-  if (lines.length < 2) throw new Error('vacío');
-  const sep = lines[0].includes(';') ? ';' : ',';
-  const rows = lines.map(l => l.split(sep).map(c => c.trim().replace(/^"|"$/g, '')));
-  const result = processStockRaw(rows);
-  if (!result.length) throw new Error('sin columnas reconocibles');
-  return result;
-}
-
 function initStockData() {
   if (window.STOCK_DATA && window.STOCK_DATA.length) {
     stockData = processStockRaw(window.STOCK_DATA);
     _updateStockUI(stockData.length + ' SKUs');
-    return;
   }
-  fetch(_buildStockURL())
-    .then(r => {
-      if (r.status === 401 || r.status === 403) throw new Error('token');
-      if (!r.ok) throw new Error('no encontrado');
-      return r.text();
-    })
-    .then(text => {
-      stockData = _parseStockText(text);
-      _updateStockUI(stockData.length + ' SKUs');
-      if (filtered.length) renderStockKPIsResumen(filtered);
-      if (selectedCompraProveedor) {
-        const provData = filtered.filter(r => r.proveedor === selectedCompraProveedor);
-        renderBloqueBArticulos(provData, sumF(provData,'monto'), sumF(filtered,'monto'));
-        if (selectedCompraArticulo) renderBloqueCAnalisis();
-      }
-    })
-    .catch(err => {
-      stockData = [];
-      if (err.message === 'token') {
-        _updateStockUI(null, true);
-      } else {
-        _updateStockUI(null);
-      }
-    });
 }
 
-function _updateStockUI(msg, tokenExpired) {
+function _updateStockUI(msg) {
   const badge = document.getElementById('stock-hdr-badge');
   const statusEl = document.getElementById('stock-load-status');
   if (badge) {
-    if (tokenExpired) {
-      badge.textContent = '🔑 Token expirado — clic para renovar';
-      badge.style.cursor = 'pointer';
-      badge.style.background = 'rgba(220,38,38,.5)';
-      badge.onclick = promptStockToken;
-    } else {
-      badge.textContent = msg ? '📦 Stock: ' + msg : '📦 Stock: no cargado';
-      badge.style.cursor = '';
-      badge.style.background = 'rgba(255,255,255,.1)';
-      badge.onclick = null;
-    }
+    badge.textContent = msg ? '📦 Stock: ' + msg : '📦 Stock: no cargado';
+    badge.style.background = 'rgba(255,255,255,.1)';
   }
   if (statusEl) statusEl.textContent = msg ? 'Stock: ' + msg : 'Stock: no cargado';
 }
@@ -918,7 +853,19 @@ function renderStockKPIsResumen(data) {
   const el = document.getElementById('stock-kpis-resumen');
   if (!el) return;
   if (!hasStock()) {
-    el.innerHTML = '<div style="font-size:11px;color:var(--muted);padding:4px 0 10px">📦 Stock no cargado — colocá <code>stock.js</code> junto al index o usá "⬆ Cargar stock CSV" en el encabezado.</div>';
+    el.innerHTML = `<div id="stock-dz" class="stock-dz"
+      ondragover="stockDzOver(event)" ondragleave="stockDzLeave(event)" ondrop="stockDzDrop(event)"
+      onclick="document.getElementById('stock-file-input').click()">
+      <div style="font-size:36px;margin-bottom:10px">📦</div>
+      <div style="font-size:14px;font-weight:800;color:var(--navy);margin-bottom:6px">Cargar datos de stock</div>
+      <div style="color:var(--muted);font-size:12px;line-height:1.6;margin-bottom:14px">
+        Arrastrá el archivo <strong>Reporte Stock.csv</strong> aquí, o hacé clic para buscarlo.<br>
+        <em style="font-size:11px">Alternativa: ejecutar <code>convertir_stock.ps1</code> y recargar la página.</em>
+      </div>
+      <label class="loader-btn" onclick="event.stopPropagation()">📂 Seleccionar CSV
+        <input type="file" id="stock-file-input" accept=".csv" style="display:none" onchange="loadStockCSVFile(this.files[0])">
+      </label>
+    </div>`;
     return;
   }
   const totalStock = stockData.reduce((s, r) => s + r.stock, 0);
@@ -2514,6 +2461,10 @@ function dzDragOver(e) { e.preventDefault(); document.getElementById('drop-zone'
 function dzDragLeave() { document.getElementById('drop-zone').classList.remove('over'); }
 function dzDrop(e) { e.preventDefault(); dzDragLeave(); if (e.dataTransfer.files[0]) loadCSVFile(e.dataTransfer.files[0]); }
 
+function stockDzOver(e) { e.preventDefault(); const dz = document.getElementById('stock-dz'); if (dz) dz.classList.add('over'); }
+function stockDzLeave(e) { const dz = document.getElementById('stock-dz'); if (dz) dz.classList.remove('over'); }
+function stockDzDrop(e) { e.preventDefault(); stockDzLeave(); if (e.dataTransfer.files[0]) loadStockCSVFile(e.dataTransfer.files[0]); }
+
 function loadCSVFile(file) {
   if (!file) return;
   const reader = new FileReader();
@@ -2577,3 +2528,4 @@ function prioBadge(r) { return rotBadge(r); }
 </script>
 </body>
 </html>
+

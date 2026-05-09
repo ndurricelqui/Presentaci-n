@@ -1,146 +1,109 @@
-# convertir_stock.ps1
-# Lee C:\Users\usuario\Documents\PowerBi Pampero\Reporte Stock.xlsx
-# Genera stock.js en el mismo directorio que este script
-# Uso: clic derecho sobre el archivo → "Ejecutar con PowerShell"
-#      o desde terminal: .\convertir_stock.ps1
+# convertir_stock.ps1 — Genera stock.js desde Reporte Stock.csv
+# Uso: powershell -ExecutionPolicy Bypass -File convertir_stock.ps1
+# Ejecutar cada vez que se actualice Reporte Stock.csv
 
-$ExcelPath   = "C:\Users\usuario\Documents\PowerBi Pampero\Reporte Stock.xlsx"
-$OutputPath  = Join-Path $PSScriptRoot "stock.js"
+$csv = "C:\Users\usuario\Documents\Tableros\Reporte Stock.csv"
+$out = "C:\Users\usuario\Documents\Tableros\stock.js"
 
-# ── Verificar que existe el archivo ──────────────────────────────────────────
-if (-not (Test-Path $ExcelPath)) {
-    Write-Host "ERROR: No se encontro el archivo:" -ForegroundColor Red
-    Write-Host "  $ExcelPath" -ForegroundColor Red
-    Write-Host ""
-    Write-Host "Verifica la ruta y volvé a ejecutar." -ForegroundColor Yellow
-    Read-Host "Presioná Enter para salir"
+if (-not (Test-Path $csv)) {
+    Write-Host "ERROR: No se encontro el archivo: $csv" -ForegroundColor Red
+    Read-Host "Presiona Enter para salir"
     exit 1
 }
 
-Write-Host "Leyendo: $ExcelPath" -ForegroundColor Cyan
+$lines = [System.IO.File]::ReadAllLines($csv, [System.Text.Encoding]::UTF8)
 
-# ── Abrir Excel via COM ───────────────────────────────────────────────────────
-try {
-    $excel = New-Object -ComObject Excel.Application
-    $excel.Visible = $false
-    $excel.DisplayAlerts = $false
-    $wb = $excel.Workbooks.Open($ExcelPath)
-    $ws = $wb.Sheets.Item(1)   # Primera hoja
-} catch {
-    Write-Host "ERROR al abrir Excel: $_" -ForegroundColor Red
-    Read-Host "Presioná Enter para salir"
+if ($lines.Length -lt 2) {
+    Write-Host "ERROR: El archivo CSV esta vacio o no tiene datos." -ForegroundColor Red
+    Read-Host "Presiona Enter para salir"
     exit 1
 }
 
-# ── Leer cabecera y detectar columnas ─────────────────────────────────────────
-$lastCol  = $ws.UsedRange.Columns.Count
-$lastRow  = $ws.UsedRange.Rows.Count
-$startRow = $ws.UsedRange.Row
-$startCol = $ws.UsedRange.Column
+# Detectar separador
+$sep = if ($lines[0].Contains(";")) { ";" } else { "," }
 
-Write-Host "Filas: $lastRow  |  Columnas: $lastCol" -ForegroundColor Gray
+# Leer encabezados y detectar columnas
+$headers = $lines[0] -split [regex]::Escape($sep) | ForEach-Object { $_.Trim().ToLower() -replace '"','' }
 
-# Leer fila de encabezados
-$headers = @()
-for ($c = $startCol; $c -le ($startCol + $lastCol - 1); $c++) {
-    $val = $ws.Cells.Item($startRow, $c).Text
-    $headers += $val.ToString().Trim().ToLower()
-}
-
-function Find-Col($candidates) {
+function Find-Col([string[]]$candidates) {
     foreach ($cand in $candidates) {
         for ($i = 0; $i -lt $headers.Count; $i++) {
-            if ($headers[$i] -like "*$cand*") { return $i + $startCol }
+            if ($headers[$i] -like "*$cand*") { return $i }
         }
     }
     return -1
 }
 
-$colProv  = Find-Col @("proveedor","marca","nombre prov")
-$colArt   = Find-Col @("articulo","artículo","descripcion","descripción","producto")
-$colColor = Find-Col @("color")
-$colTalle = Find-Col @("talle","tamaño")
-$colStk   = Find-Col @("stock","disponible","existencia","cantidad")
+$colProv      = Find-Col @("nombre","proveedor","marca")
+$colArt       = Find-Col @("descripci","articulo","artículo","producto")
+$colColorCod  = Find-Col @("color")          # primera coincidencia: "color"
+$colTalle     = Find-Col @("talle","tamaño")
+$colStock     = Find-Col @("cantidad","stock","disponible","existencia")
 
-Write-Host ""
+# "color descripción" suele estar antes que "color" en orden, buscar la segunda columna que contiene "color"
+$colColorDesc = -1
+for ($i = 0; $i -lt $headers.Count; $i++) {
+    if ($headers[$i] -like "*color*" -and $i -ne $colColorCod) {
+        $colColorDesc = $i
+        break
+    }
+}
+
 Write-Host "Columnas detectadas:" -ForegroundColor Cyan
-Write-Host "  Proveedor : $(if ($colProv  -ge 0) { $headers[$colProv  - $startCol] + ' (col ' + $colProv  + ')' } else { 'NO ENCONTRADA' })"
-Write-Host "  Articulo  : $(if ($colArt   -ge 0) { $headers[$colArt   - $startCol] + ' (col ' + $colArt   + ')' } else { 'NO ENCONTRADA' })"
-Write-Host "  Color     : $(if ($colColor -ge 0) { $headers[$colColor - $startCol] + ' (col ' + $colColor + ')' } else { 'NO ENCONTRADA' })"
-Write-Host "  Talle     : $(if ($colTalle -ge 0) { $headers[$colTalle - $startCol] + ' (col ' + $colTalle + ')' } else { 'NO ENCONTRADA' })"
-Write-Host "  Stock     : $(if ($colStk   -ge 0) { $headers[$colStk   - $startCol] + ' (col ' + $colStk   + ')' } else { 'NO ENCONTRADA' })"
+Write-Host "  Proveedor        : $(if ($colProv     -ge 0) { $headers[$colProv]     + ' (col ' + $colProv     + ')' } else { 'NO ENCONTRADA' })"
+Write-Host "  Articulo         : $(if ($colArt      -ge 0) { $headers[$colArt]      + ' (col ' + $colArt      + ')' } else { 'NO ENCONTRADA' })"
+Write-Host "  Color codigo     : $(if ($colColorCod -ge 0) { $headers[$colColorCod] + ' (col ' + $colColorCod + ')' } else { 'NO ENCONTRADA' })"
+Write-Host "  Color descripcion: $(if ($colColorDesc -ge 0) { $headers[$colColorDesc] + ' (col ' + $colColorDesc + ')' } else { 'NO ENCONTRADA' })"
+Write-Host "  Talle            : $(if ($colTalle    -ge 0) { $headers[$colTalle]    + ' (col ' + $colTalle    + ')' } else { 'NO ENCONTRADA' })"
+Write-Host "  Stock/Cantidad   : $(if ($colStock    -ge 0) { $headers[$colStock]    + ' (col ' + $colStock    + ')' } else { 'NO ENCONTRADA' })"
 
-if ($colStk -lt 0) {
+if ($colStock -lt 0) {
     Write-Host ""
-    Write-Host "ERROR: No se encontro columna de stock (stock/cantidad/disponible/existencia)." -ForegroundColor Red
-    $wb.Close($false)
-    $excel.Quit()
-    [System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
-    Read-Host "Presioná Enter para salir"
+    Write-Host "ERROR: No se encontro columna de stock/cantidad." -ForegroundColor Red
+    Read-Host "Presiona Enter para salir"
     exit 1
 }
 
-# ── Leer filas de datos ────────────────────────────────────────────────────────
-$records = @()
-$dataStart = $startRow + 1
-$errors = 0
+$esc = [scriptblock]{ param($s) $s.Trim().Replace('\','\\').Replace('"','\"') }
 
-for ($row = $dataStart; $row -le ($startRow + $lastRow - 1); $row++) {
-    $prov  = if ($colProv  -ge 0) { $ws.Cells.Item($row, $colProv ).Text.Trim() } else { "" }
-    $art   = if ($colArt   -ge 0) { $ws.Cells.Item($row, $colArt  ).Text.Trim() } else { "" }
-    $color = if ($colColor -ge 0) { $ws.Cells.Item($row, $colColor).Text.Trim() } else { "" }
-    $talle = if ($colTalle -ge 0) { $ws.Cells.Item($row, $colTalle).Text.Trim() } else { "" }
-    $stkRaw = $ws.Cells.Item($row, $colStk).Text.Trim().Replace(",", ".")
+$records = New-Object System.Collections.ArrayList
+$errores = 0
 
-    # Saltar filas vacías
-    if ($prov -eq "" -and $art -eq "" -and $stkRaw -eq "") { continue }
+for ($i = 1; $i -lt $lines.Length; $i++) {
+    $line = $lines[$i].Trim() -replace '"',''
+    if (-not $line) { continue }
+    $c = $line -split [regex]::Escape($sep)
+
+    $prov      = if ($colProv     -ge 0 -and $colProv     -lt $c.Length) { (& $esc $c[$colProv])     } else { "" }
+    $art       = if ($colArt      -ge 0 -and $colArt      -lt $c.Length) { (& $esc $c[$colArt])      } else { "" }
+    $colorCod  = if ($colColorCod -ge 0 -and $colColorCod -lt $c.Length) { (& $esc $c[$colColorCod]) } else { "" }
+    $colorDesc = if ($colColorDesc -ge 0 -and $colColorDesc -lt $c.Length) { (& $esc $c[$colColorDesc]) } else { "" }
+    $talle     = if ($colTalle    -ge 0 -and $colTalle    -lt $c.Length) { (& $esc $c[$colTalle])    } else { "" }
+    $stkRaw    = if ($colStock    -ge 0 -and $colStock    -lt $c.Length) { $c[$colStock].Trim() } else { "0" }
 
     $stkVal = 0.0
-    $parsed = [double]::TryParse($stkRaw, [System.Globalization.NumberStyles]::Any,
-                                  [System.Globalization.CultureInfo]::InvariantCulture, [ref]$stkVal)
-    if (-not $parsed) {
-        $errors++
-        continue
-    }
+    $parsed = [double]::TryParse(
+        $stkRaw.Replace(",", "."),
+        [System.Globalization.NumberStyles]::Any,
+        [System.Globalization.CultureInfo]::InvariantCulture,
+        [ref]$stkVal
+    )
+    if (-not $parsed) { $errores++; continue }
 
-    # Escapar comillas para JSON
-    $provEsc  = $prov  -replace '"', '\"'
-    $artEsc   = $art   -replace '"', '\"'
-    $colorEsc = $color -replace '"', '\"'
-    $talleEsc = $talle -replace '"', '\"'
-
-    $records += "  {""proveedor"":""$provEsc"",""articulo"":""$artEsc"",""color"":""$colorEsc"",""talle"":""$talleEsc"",""stock"":$stkVal}"
+    $r = '{"proveedor":"' + $prov + '","articulo":"' + $art + '","color":"' + $colorCod + '","color descripcion":"' + $colorDesc + '","talle":"' + $talle + '","stock":' + $stkVal.ToString([System.Globalization.CultureInfo]::InvariantCulture) + '}'
+    [void]$records.Add($r)
 }
 
-# ── Cerrar Excel ──────────────────────────────────────────────────────────────
-$wb.Close($false)
-$excel.Quit()
-[System.Runtime.Interopservices.Marshal]::ReleaseComObject($excel) | Out-Null
-[GC]::Collect()
-[GC]::WaitForPendingFinalizers()
+$date    = Get-Date -Format "yyyy-MM-dd HH:mm"
+$json    = "[" + ($records -join ",") + "]"
+$content = "// stock.js - generado el $date desde Reporte Stock.csv`nwindow.STOCK_DATA=$json;"
 
-# ── Escribir stock.js ─────────────────────────────────────────────────────────
-$date   = Get-Date -Format "yyyy-MM-dd HH:mm"
-$body   = $records -join ",`n"
-$content = @"
-// stock.js — generado automaticamente el $date
-// Fuente: $ExcelPath
-// NO editar manualmente. Ejecutar convertir_stock.ps1 para regenerar.
-window.STOCK_DATA = [
-$body
-];
-"@
-
-[System.IO.File]::WriteAllText($OutputPath, $content, [System.Text.Encoding]::UTF8)
+[System.IO.File]::WriteAllText($out, $content, [System.Text.Encoding]::UTF8)
 
 Write-Host ""
-Write-Host "Listo!" -ForegroundColor Green
-Write-Host "  Registros procesados : $($records.Count)" -ForegroundColor Green
-if ($errors -gt 0) {
-    Write-Host "  Filas con error de parseo (ignoradas): $errors" -ForegroundColor Yellow
-}
-Write-Host "  Archivo generado     : $OutputPath" -ForegroundColor Green
+Write-Host "Listo: $out" -ForegroundColor Green
+Write-Host "  Registros procesados : $($records.Count)"
+if ($errores -gt 0) { Write-Host "  Filas con errores     : $errores" -ForegroundColor Yellow }
 Write-Host ""
-Write-Host "Copiá stock.js junto a index.html y recargá el tablero." -ForegroundColor Cyan
-Write-Host ""
-Read-Host "Presioná Enter para salir"
+Write-Host "Recarga index.html en el navegador para ver el stock actualizado."
+Read-Host "Presiona Enter para salir"
