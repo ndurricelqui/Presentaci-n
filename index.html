@@ -155,13 +155,25 @@ td.presup-col{color:var(--blue);font-weight:700}
 .resumen-top-bar h2{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
 
 /* COMPRA GUIADO */
-.compra-art-item{padding:12px 14px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;border-radius:4px;margin-bottom:2px}
+.compra-art-item{padding:11px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;border-radius:6px;margin-bottom:3px}
 .compra-art-item:hover{background:#f0f4ff}
-.compra-art-item.selected{background:#eef2ff;border-left:3px solid var(--orange);padding-left:11px}
+.compra-art-item.selected{background:#eef2ff;border-left:4px solid var(--orange);padding-left:12px}
+.compra-art-item-name{font-size:13px;font-weight:700;color:var(--navy);line-height:1.3}
+.compra-art-item-meta{font-size:11px;color:var(--muted);margin-top:3px}
 .compra-prov-sel{border:2px solid var(--border);border-radius:8px;padding:10px 14px;font-size:15px;font-weight:700;color:var(--navy);width:100%;background:#fff;cursor:pointer;transition:border-color .15s}
 .compra-prov-sel:focus{outline:none;border-color:var(--orange)}
-.compra-sub-card{background:#fff;border:1px solid var(--border);border-radius:8px;padding:16px}
-@media(max-width:900px){#compra-bc-grid{grid-template-columns:1fr!important}}
+.compra-prov-dropdown{position:relative;width:100%}
+.compra-prov-search{border:2px solid var(--border);border-radius:8px;padding:11px 16px;font-size:15px;font-weight:700;color:var(--navy);width:100%;background:#fff;cursor:text;transition:border-color .15s;box-sizing:border-box}
+.compra-prov-search:focus{outline:none;border-color:var(--orange)}
+.compra-prov-list{position:absolute;top:calc(100% + 4px);left:0;right:0;background:#fff;border:2px solid var(--navy);border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,0.18);max-height:380px;overflow-y:auto;z-index:200;display:none}
+.compra-prov-option{padding:12px 16px;font-size:14px;font-weight:600;color:var(--navy);cursor:pointer;border-bottom:1px solid #f0f0f0;line-height:1.4}
+.compra-prov-option:last-child{border-bottom:none}
+.compra-prov-option:hover,.compra-prov-option.active{background:var(--orange);color:#fff}
+.compra-prov-option .prov-meta{font-size:12px;font-weight:400;opacity:.8;display:block;margin-top:2px}
+.compra-sub-card{background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:18px}
+.compra-sub-card .card-title{font-size:11px;margin-bottom:10px}
+#talle-info-panel{min-width:300px!important;padding:22px 28px!important;font-size:14px!important}
+@media(max-width:1000px){#compra-bc-grid{grid-template-columns:1fr!important}}
 </style>
 </head>
 <body>
@@ -239,13 +251,9 @@ td.presup-col{color:var(--blue);font-weight:700}
 <div class="tab-panel active" id="tab-resumen">
 
   <!-- ENCABEZADO EJECUTIVO -->
-  <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;border-left:none">
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
-      <div style="flex:1;min-width:200px">
-        <div style="font-size:20px;font-weight:900;margin-bottom:4px">Resumen Ejecutivo de Ventas</div>
-        <div id="res-subtitulo" style="font-size:13px;opacity:.7;margin-bottom:8px"></div>
-        <div id="res-insight-header" style="font-size:13px;opacity:.9;line-height:1.6;max-width:680px"></div>
-      </div>
+  <div class="card" style="margin-bottom:20px;background:linear-gradient(135deg,var(--navy) 0%,var(--navy2) 100%);color:#fff;border-left:none;padding:12px 20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div id="res-subtitulo" style="font-size:13px;opacity:.75"></div>
       <button class="btn-clear-sel" onclick="clearFilters()" style="border-color:rgba(255,255,255,.6);color:#fff;flex-shrink:0">✕ Limpiar selección</button>
     </div>
   </div>
@@ -272,8 +280,11 @@ td.presup-col{color:var(--blue);font-weight:700}
   <!-- GRÁFICO 3: ABC (top 15) -->
   <div class="card">
     <div class="card-title">Concentración ABC de Artículos (Top 15)</div>
-    <div class="chart-click-hint" style="margin-bottom:6px">Artículos ordenados por venta — barras por zona ABC, línea naranja = acumulado</div>
-    <div style="position:relative;height:260px"><canvas id="ch-abc"></canvas></div>
+    <div class="chart-click-hint" style="margin-bottom:6px">Clic en una barra para ver detalle del artículo · Clic en barra seleccionada para cerrar</div>
+    <div style="position:relative;height:400px">
+      <canvas id="ch-abc"></canvas>
+      <div id="abc-detail-panel" style="display:none;position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:20;background:#fff;border:2px solid var(--navy);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.22);padding:18px 24px;min-width:260px;max-width:340px;font-size:13px;color:var(--navy)"></div>
+    </div>
     <div id="res-abc-resumen" style="margin-top:16px"></div>
   </div>
 
@@ -345,48 +356,46 @@ td.presup-col{color:var(--blue);font-weight:700}
     </div>
     <div class="f-group" style="max-width:520px;margin-bottom:16px">
       <label>Seleccionar proveedor (ordenados por venta $)</label>
-      <select id="compra-prov-select" class="compra-prov-sel" onchange="selectCompraProveedor(this.value)">
-        <option value="">— Seleccionar proveedor —</option>
-      </select>
+      <div class="compra-prov-dropdown" id="compra-prov-dropdown">
+        <input type="text" id="compra-prov-search" class="compra-prov-search" placeholder="Buscar proveedor..." autocomplete="off" readonly onfocus="openProvDropdown()" />
+        <div class="compra-prov-list" id="compra-prov-list"></div>
+      </div>
     </div>
     <div id="compra-prov-kpis" class="kpi-grid" style="margin-bottom:0"></div>
   </div>
 
   <!-- BLOQUES B + C -->
   <div id="compra-bc-layout" style="display:none">
-    <div style="display:grid;grid-template-columns:320px 1fr;gap:20px;align-items:start" id="compra-bc-grid">
+    <div style="display:grid;grid-template-columns:400px 1fr;gap:20px;align-items:start" id="compra-bc-grid">
 
       <!-- BLOQUE B: Lista artículos del proveedor -->
-      <div class="card" style="margin-bottom:0">
-        <div class="card-title">Artículos del proveedor</div>
-        <div id="compra-art-list" style="max-height:680px;overflow-y:auto"></div>
+      <div class="card" style="margin-bottom:0;padding:16px 12px">
+        <div class="card-title" style="margin-bottom:12px;font-size:12px">Artículos del proveedor</div>
+        <div id="compra-art-list" style="max-height:720px;overflow-y:auto"></div>
       </div>
 
       <!-- BLOQUE C: Análisis del artículo seleccionado -->
       <div class="card" style="margin-bottom:0">
-        <div id="compra-art-nombre" style="font-size:15px;font-weight:900;color:var(--navy);margin-bottom:10px;padding-bottom:10px;border-bottom:2px solid var(--orange)"></div>
-        <div id="compra-meses-objetivo-wrap" style="display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap">
+        <div id="compra-art-nombre" style="font-size:16px;font-weight:900;color:var(--navy);margin-bottom:12px;padding-bottom:12px;border-bottom:2px solid var(--orange)"></div>
+        <div id="compra-meses-objetivo-wrap" style="display:flex;align-items:center;gap:12px;margin-bottom:16px;flex-wrap:wrap;background:var(--bg);border-radius:8px;padding:10px 14px">
           <span style="font-size:11px;font-weight:700;color:var(--navy)">🎯 Meses objetivo de cobertura:</span>
           <input type="number" id="meses-objetivo-input" value="2" min="0.5" max="24" step="0.5"
-                 style="width:65px;border:1px solid var(--border);border-radius:6px;padding:3px 7px;font-size:13px;font-weight:700;color:var(--navy)"
+                 style="width:70px;border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;font-weight:700;color:var(--navy)"
                  oninput="updateMesesObjetivo(this.value)">
           <span id="stock-load-status" style="font-size:11px;color:var(--muted)">Stock: no cargado</span>
         </div>
-        <div id="compra-art-kpis" class="kpi-grid" style="margin-bottom:12px"></div>
-        <div id="compra-art-stock-kpis" style="margin-bottom:16px"></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
-          <div class="compra-sub-card">
+        <div id="compra-art-kpis" class="kpi-grid" style="margin-bottom:16px"></div>
+        <div id="compra-art-stock-kpis" style="margin-bottom:20px"></div>
+        <div style="display:grid;grid-template-columns:1.38fr 1fr;gap:16px;margin-bottom:20px">
+          <div class="compra-sub-card" style="position:relative">
             <div class="card-title" style="font-size:11px">Unidades por Talle</div>
-            <div class="chart-wrap"><canvas id="ch-compra-talle"></canvas></div>
+            <div class="chart-wrap-xl" style="height:460px"><canvas id="ch-compra-talle"></canvas></div>
+            <div id="talle-info-panel" style="display:none;position:absolute;top:40px;left:50%;transform:translateX(-50%);z-index:20;background:#fff;border:2px solid var(--navy);border-radius:14px;box-shadow:0 8px 32px rgba(0,0,0,0.22);padding:22px 28px;min-width:300px;font-size:14px;color:var(--navy)"></div>
           </div>
           <div class="compra-sub-card">
             <div class="card-title" style="font-size:11px">Distribución por Color</div>
-            <div class="chart-wrap"><canvas id="ch-compra-color"></canvas></div>
+            <div class="chart-wrap-xl" style="height:460px"><canvas id="ch-compra-color"></canvas></div>
           </div>
-        </div>
-        <div>
-          <div class="card-title">Detalle Color × Talle</div>
-          <div class="tw" id="compra-detalle-tabla"></div>
         </div>
       </div>
 
@@ -580,7 +589,7 @@ function normalizarArticuloMacata(nombre) {
   }
 
   if (s.includes('PANTALON') && (s.includes('TRABAJO') || s.includes('TRAB.')) && !s.includes('CARGO')) {
-    return 'CAMISA DE TRABAJO H.M/L PAMPERO';
+    return 'PANTALON DE TRABAJO PAMPERO';
   }
 
   if (s.includes('PANTALON') && s.includes('CAIRO')) {
@@ -888,24 +897,7 @@ function renderStockKPIsResumen(data) {
     if (est === 'QUIEBRE') quiebre++;
     if (est === 'URGENTE') urgente++;
   });
-  el.innerHTML = `
-    <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <div class="kpi-card k-navy" style="flex:1;min-width:120px">
-        <div class="kpi-lbl">Stock Total Uds</div>
-        <div class="kpi-val">${fmt(totalStock)}</div>
-        <div class="kpi-sub">${stockData.length} SKUs cargados</div>
-      </div>
-      <div class="kpi-card k-red" style="flex:1;min-width:120px">
-        <div class="kpi-lbl">SKUs en Quiebre</div>
-        <div class="kpi-val">${quiebre}</div>
-        <div class="kpi-sub">stock 0 o cob. 0</div>
-      </div>
-      <div class="kpi-card k-yellow" style="flex:1;min-width:120px">
-        <div class="kpi-lbl">SKUs Urgentes</div>
-        <div class="kpi-val">${urgente}</div>
-        <div class="kpi-sub">cobertura &lt; 1 mes</div>
-      </div>
-    </div>`;
+  el.innerHTML = '';
 }
 
 // ============================================================
@@ -923,32 +915,7 @@ function renderStockKPIsCompraArticulo(artDataColSF, mesesCol) {
   const compraSug = Math.max(0, promMes * mesesCoberturaObjetivo - stkRel);
   const estado  = stockEstado(cob, stkRel);
   const cobDisp = cob === 999 ? 'Sin venta' : cob.toFixed(1) + ' m';
-  el.innerHTML = `
-    <div style="padding:12px;background:var(--bg);border-radius:8px;border:1px solid var(--border)">
-      <div style="font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px">
-        📦 Stock actual${selectedCompraColor ? ' — ' + selectedCompraColor : ''}
-      </div>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <div class="kpi-card k-navy" style="flex:1;min-width:100px;margin-bottom:0">
-          <div class="kpi-lbl">Stock actual</div>
-          <div class="kpi-val">${fmt(stkRel)}</div>
-          <div class="kpi-sub">unidades</div>
-        </div>
-        <div class="kpi-card k-blue" style="flex:1;min-width:100px;margin-bottom:0">
-          <div class="kpi-lbl">Cobertura</div>
-          <div class="kpi-val" style="font-size:${cob === 999 ? '13px' : '22px'}">${cobDisp}</div>
-          <div class="kpi-sub">meses</div>
-        </div>
-        <div class="kpi-card k-green" style="flex:1;min-width:100px;margin-bottom:0">
-          <div class="kpi-lbl">Compra sugerida</div>
-          <div class="kpi-val">${fmt(Math.round(compraSug))}</div>
-          <div class="kpi-sub">uds para ${mesesCoberturaObjetivo} m</div>
-        </div>
-        <div style="flex:1;min-width:100px;display:flex;align-items:center;justify-content:center">
-          ${stockBadge(estado)}
-        </div>
-      </div>
-    </div>`;
+  el.innerHTML = '';
 }
 
 // ============================================================
@@ -1283,6 +1250,73 @@ function renderCompraArticulo(data) {
 }
 
 // ============================================================
+// DROPDOWN BUSCADOR DE PROVEEDORES
+// ============================================================
+function renderProvDropdownOptions(rows, filter) {
+  const list = document.getElementById('compra-prov-list');
+  if (!list) return;
+  const q = (filter || '').toLowerCase().trim();
+  const filtered2 = q ? rows.filter(r => r.proveedor.toLowerCase().includes(q)) : rows;
+  list.innerHTML = '';
+  if (!q) {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'compra-prov-option';
+    placeholder.style.cssText = 'color:var(--muted);font-weight:400;font-style:italic';
+    placeholder.textContent = '— Seleccionar proveedor —';
+    placeholder.addEventListener('mousedown', e => { e.preventDefault(); selectCompraProveedor(''); });
+    list.appendChild(placeholder);
+  }
+  filtered2.forEach(r => {
+    const div = document.createElement('div');
+    div.className = 'compra-prov-option' + (r.proveedor === selectedCompraProveedor ? ' active' : '');
+    div.innerHTML = `${r.proveedor}<span class="prov-meta">${fmtP(r.monto)} — ${fmt(r.cantidad)} uds · ${r.numArt} artículo${r.numArt !== 1 ? 's' : ''}</span>`;
+    div.addEventListener('mousedown', e => { e.preventDefault(); selectCompraProveedor(r.proveedor); });
+    list.appendChild(div);
+  });
+  if (filtered2.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'compra-prov-option';
+    empty.style.cssText = 'color:var(--muted);font-style:italic';
+    empty.textContent = 'Sin resultados';
+    list.appendChild(empty);
+  }
+}
+
+function openProvDropdown() {
+  const input = document.getElementById('compra-prov-search');
+  const list = document.getElementById('compra-prov-list');
+  if (!input || !list) return;
+  input.removeAttribute('readonly');
+  input.select();
+  renderProvDropdownOptions(compraGuidedProvRows, '');
+  list.style.display = 'block';
+}
+
+function closeProvDropdown() {
+  const list = document.getElementById('compra-prov-list');
+  const input = document.getElementById('compra-prov-search');
+  if (list) list.style.display = 'none';
+  if (input) input.setAttribute('readonly', '');
+}
+
+document.addEventListener('click', e => {
+  const dd = document.getElementById('compra-prov-dropdown');
+  if (dd && !dd.contains(e.target)) closeProvDropdown();
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('compra-prov-search');
+  if (!input) return;
+  input.addEventListener('input', () => {
+    const list = document.getElementById('compra-prov-list');
+    if (list) list.style.display = 'block';
+    renderProvDropdownOptions(compraGuidedProvRows, input.value);
+  });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeProvDropdown(); input.blur(); }
+  });
+});
+
+// ============================================================
 // COMPRA GUIADA — 3 bloques
 // ============================================================
 function renderCompraGuiado(data) {
@@ -1300,16 +1334,8 @@ function renderCompraGuiado(data) {
   });
   compraGuidedProvRows.sort((a, b) => b.monto - a.monto);
 
-  // Poblar select de proveedores
-  const sel = document.getElementById('compra-prov-select');
-  sel.innerHTML = '<option value="">— Seleccionar proveedor —</option>';
-  compraGuidedProvRows.forEach(r => {
-    const o = document.createElement('option');
-    o.value = r.proveedor;
-    o.textContent = r.proveedor + '  (' + fmtP(r.monto) + ')';
-    if (r.proveedor === selectedCompraProveedor) o.selected = true;
-    sel.appendChild(o);
-  });
+  // Poblar dropdown custom de proveedores
+  renderProvDropdownOptions(compraGuidedProvRows);
 
   // Si había un proveedor seleccionado y sigue siendo válido, refrescar
   if (selectedCompraProveedor && compraGuidedProvRows.some(r => r.proveedor === selectedCompraProveedor)) {
@@ -1317,6 +1343,8 @@ function renderCompraGuiado(data) {
   } else {
     selectedCompraProveedor = '';
     selectedCompraArticulo = '';
+    const si = document.getElementById('compra-prov-search');
+    if (si) si.value = '';
     document.getElementById('compra-prov-kpis').innerHTML = '';
     document.getElementById('compra-bc-layout').style.display = 'none';
   }
@@ -1324,7 +1352,12 @@ function renderCompraGuiado(data) {
 
 function selectCompraProveedor(prov) {
   selectedCompraProveedor = prov;
-  document.getElementById('compra-prov-select').value = prov;
+  const searchInput = document.getElementById('compra-prov-search');
+  if (searchInput) {
+    const found = compraGuidedProvRows.find(r => r.proveedor === prov);
+    searchInput.value = found ? found.proveedor + '  (' + fmtP(found.monto) + ')' : '';
+  }
+  closeProvDropdown();
 
   if (!prov) {
     document.getElementById('compra-prov-kpis').innerHTML = '';
@@ -1492,7 +1525,6 @@ function renderBloqueCAnalisis() {
     <div class="kpi-card k-blue"><div class="kpi-lbl">Prom. uds/mes</div><div class="kpi-val">${promMesCol}</div><div class="kpi-sub">${mesesCol.toFixed(1)} meses analizados</div></div>
     <div class="kpi-card k-green"><div class="kpi-lbl">% en proveedor</div><div class="kpi-val">${(pctColProv * 100).toFixed(1)}%</div></div>
     <div class="kpi-card k-navy"><div class="kpi-lbl">% sobre total</div><div class="kpi-val">${(pctColTotal * 100).toFixed(2)}%</div></div>
-    <div class="kpi-card k-yellow"><div class="kpi-lbl">Presupuesto sugerido</div><div class="kpi-val" style="font-size:${presupuestoTotal > 0 ? '17px' : '22px'}">${presupuestoTotal > 0 ? fmtP(presupCol) : '—'}</div></div>
     <div class="kpi-card"><div class="kpi-lbl">Talle líder</div><div class="kpi-val" style="font-size:16px">${talleLiderCol}</div></div>
   ` : `
     <div class="kpi-card"><div class="kpi-lbl">Venta artículo</div><div class="kpi-val">${fmtP(ventaArt)}</div></div>
@@ -1500,7 +1532,6 @@ function renderBloqueCAnalisis() {
     <div class="kpi-card k-blue"><div class="kpi-lbl">Prom. uds/mes</div><div class="kpi-val">${promMesCol}</div><div class="kpi-sub">${mesesCol.toFixed(1)} meses analizados</div></div>
     <div class="kpi-card k-green"><div class="kpi-lbl">% en proveedor</div><div class="kpi-val">${(pctProv * 100).toFixed(1)}%</div></div>
     <div class="kpi-card k-navy"><div class="kpi-lbl">% sobre total</div><div class="kpi-val">${(pctTotal * 100).toFixed(2)}%</div></div>
-    <div class="kpi-card k-yellow"><div class="kpi-lbl">Presupuesto sugerido</div><div class="kpi-val" style="font-size:${presupuestoTotal > 0 ? '17px' : '22px'}">${presupuestoTotal > 0 ? fmtP(presupArt) : '—'}</div></div>
     <div class="kpi-card k-red"><div class="kpi-lbl">Color líder</div><div class="kpi-val" style="font-size:13px;line-height:1.2">${colorLider}</div></div>
     <div class="kpi-card"><div class="kpi-lbl">Talle líder</div><div class="kpi-val" style="font-size:16px">${talleLider}</div></div>
   `;
@@ -1539,28 +1570,74 @@ function renderCompraTalleChart(artData) {
     });
   }
 
+  let activeTalleIdx = null;
+  const tallePanel = document.getElementById('talle-info-panel');
+  if (tallePanel) tallePanel.style.display = 'none';
+
   if (charts['ch-compra-talle']) charts['ch-compra-talle'].destroy();
   const ctx = document.getElementById('ch-compra-talle');
   if (!ctx) return;
+
+  function closeTallePanel() {
+    activeTalleIdx = null;
+    if (tallePanel) tallePanel.style.display = 'none';
+    if (charts['ch-compra-talle']) {
+      charts['ch-compra-talle'].data.datasets[0].backgroundColor = rows.map(() => '#1a2744');
+      charts['ch-compra-talle'].update();
+    }
+  }
+
+  if (window._tallePanelClickHandler) document.removeEventListener('click', window._tallePanelClickHandler);
+  window._tallePanelClickHandler = (e) => {
+    if (!tallePanel || tallePanel.style.display === 'none') return;
+    if (!ctx.contains(e.target) && !tallePanel.contains(e.target)) closeTallePanel();
+  };
+  document.addEventListener('click', window._tallePanelClickHandler);
+
+  function showTallePanel(idx) {
+    if (!tallePanel) return;
+    const r = rows[idx];
+    let html = `<div style="font-size:18px;font-weight:900;margin-bottom:14px;border-bottom:3px solid var(--orange);padding-bottom:10px;color:var(--navy)">Talle: ${r.talle}</div>`;
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">`;
+    html += `<div style="background:#f8fafc;border-radius:8px;padding:12px 14px"><span style="color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Unidades</span><br><span style="font-size:22px;font-weight:900;color:var(--navy)">${fmt(r.cantidad)}</span></div>`;
+    html += `<div style="background:#f8fafc;border-radius:8px;padding:12px 14px"><span style="color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Venta</span><br><span style="font-size:20px;font-weight:900;color:var(--navy)">${fmtP(r.monto)}</span></div>`;
+    html += `<div style="background:#f8fafc;border-radius:8px;padding:12px 14px;grid-column:1/-1"><span style="color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Prom/mes (sin Feb)</span><br><span style="font-size:20px;font-weight:800;color:var(--navy)">${r.promMes} uds</span></div>`;
+    if (r.stock !== undefined) {
+      const cobStr = r.cobertura === 999 ? 'Sin venta' : r.cobertura.toFixed(1) + ' meses';
+      const cobColor = r.cobertura >= mesesCoberturaObjetivo ? '#15803d' : r.cobertura > 0 ? '#b45309' : '#dc2626';
+      html += `<div style="background:#f8fafc;border-radius:8px;padding:12px 14px"><span style="color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Stock actual</span><br><span style="font-size:22px;font-weight:900;color:var(--navy)">${fmt(r.stock)}</span></div>`;
+      html += `<div style="background:#f8fafc;border-radius:8px;padding:12px 14px"><span style="color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Cobertura</span><br><span style="font-size:20px;font-weight:800;color:${cobColor}">${cobStr}</span></div>`;
+      html += `<div style="background:#fff3e0;border:2px solid var(--orange);border-radius:8px;padding:12px 14px;grid-column:1/-1"><span style="color:var(--muted);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px">Compra sugerida</span><br><span style="font-size:26px;font-weight:900;color:var(--orange)">${fmt(Math.round(r.compraSug))} uds</span></div>`;
+    }
+    html += `</div>`;
+    tallePanel.innerHTML = html;
+    tallePanel.style.display = 'block';
+  }
+
   charts['ch-compra-talle'] = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: rows.map(r => r.talle),
-      datasets: [{ data: rows.map(r => r.cantidad), backgroundColor: '#1a2744', borderRadius: 4 }]
+      datasets: [{ data: rows.map(r => r.cantidad), backgroundColor: rows.map(() => '#1a2744'), borderRadius: 4 }]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
+      onClick: (evt, elements) => {
+        if (!elements.length) { closeTallePanel(); return; }
+        const idx = elements[0].index;
+        if (activeTalleIdx === idx) {
+          closeTallePanel();
+        } else {
+          activeTalleIdx = idx;
+          showTallePanel(idx);
+          charts['ch-compra-talle'].data.datasets[0].backgroundColor = rows.map((_, i) => i === activeTalleIdx ? '#e07b00' : '#1a2744');
+          charts['ch-compra-talle'].update();
+        }
+      },
+      onHover: (evt, elements) => { evt.native.target.style.cursor = elements.length ? 'pointer' : 'default'; },
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: c => {
-          const r = rows[c.dataIndex];
-          const base = ['  Uds: ' + fmt(r.cantidad), '  Venta: ' + fmtP(r.monto), '  V.Prom/mes (sin Feb): ' + r.promMes];
-          if (r.stock !== undefined) {
-            const cobStr = r.cobertura === 999 ? 'Sin venta' : r.cobertura.toFixed(1) + ' m';
-            base.push('  Stock: ' + fmt(r.stock), '  Cobertura: ' + cobStr, '  Compra sug.: ' + fmt(Math.round(r.compraSug)));
-          }
-          return base;
-        } } }
+        tooltip: { enabled: false }
       },
       scales: {
         x: { ticks: { font: { size: 11 } } },
@@ -1860,16 +1937,6 @@ function renderResumenKPIs(data, provRows, artRows) {
       <div class="kpi-val" style="font-size:18px">${fmtP(totalMonto)}</div>
       <div class="kpi-sub">período seleccionado</div>
     </div>
-    <div class="kpi-card k-blue">
-      <div class="kpi-lbl">Unidades Vendidas</div>
-      <div class="kpi-val">${fmt(totalUds)}</div>
-      <div class="kpi-sub">unidades netas</div>
-    </div>
-    <div class="kpi-card k-blue">
-      <div class="kpi-lbl">Prom. Uds/Mes</div>
-      <div class="kpi-val">${fmt(promUdsMes)}</div>
-      <div class="kpi-sub">sin febrero · ${mesesSF.toFixed(1)} meses</div>
-    </div>
     <div class="kpi-card k-navy">
       <div class="kpi-lbl">Proveedor Líder</div>
       <div class="kpi-val" style="font-size:13px;line-height:1.3">${provLiderNombre}</div>
@@ -2083,11 +2150,51 @@ function renderResumenBubble(abcRows) {
 function renderResumenABC(abcData) {
   const { rows, artA, artB, artC, pctA, pctB, pctC } = abcData;
   const disp = rows.slice(0, 15);
-  const barColors = disp.map(r => r.abc === 'A' ? '#1a2744' : r.abc === 'B' ? '#e9a800' : '#d62828');
+  const baseColors = disp.map(r => r.abc === 'A' ? '#1a2744' : r.abc === 'B' ? '#e9a800' : '#d62828');
 
   if (charts['ch-abc']) charts['ch-abc'].destroy();
   const ctx = document.getElementById('ch-abc');
   if (!ctx) return;
+
+  const abcPanel = document.getElementById('abc-detail-panel');
+  let activeAbcIdx = null;
+
+  function closeAbcPanel() {
+    activeAbcIdx = null;
+    if (abcPanel) abcPanel.style.display = 'none';
+    if (charts['ch-abc']) {
+      charts['ch-abc'].data.datasets[0].backgroundColor = baseColors.slice();
+      charts['ch-abc'].update();
+    }
+  }
+
+  if (window._abcPanelClickHandler) document.removeEventListener('click', window._abcPanelClickHandler);
+  window._abcPanelClickHandler = (e) => {
+    if (!abcPanel || abcPanel.style.display === 'none') return;
+    if (!ctx.contains(e.target) && !abcPanel.contains(e.target)) closeAbcPanel();
+  };
+  document.addEventListener('click', window._abcPanelClickHandler);
+
+  function showAbcPanel(idx) {
+    if (!abcPanel) return;
+    const r = disp[idx];
+    const zoneLabel = r.abc === 'A' ? 'Zona A — Crítico' : r.abc === 'B' ? 'Zona B — Importante' : 'Zona C — Marginal';
+    const zoneColor = r.abc === 'A' ? '#1a2744' : r.abc === 'B' ? '#b45309' : '#d62828';
+    let html = `<div style="font-size:15px;font-weight:900;margin-bottom:12px;border-bottom:3px solid var(--orange);padding-bottom:8px">${r.articuloNorm}</div>`;
+    html += `<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">`;
+    html += `<div style="background:#f8fafc;border-radius:8px;padding:10px 12px"><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Zona ABC</span><br><span style="font-size:16px;font-weight:900;color:${zoneColor}">${zoneLabel}</span></div>`;
+    html += `<div style="background:#f8fafc;border-radius:8px;padding:10px 12px"><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Ranking</span><br><span style="font-size:18px;font-weight:900;color:var(--navy)">#${idx + 1}</span></div>`;
+    html += `<div style="background:#f8fafc;border-radius:8px;padding:10px 12px"><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Participación</span><br><span style="font-size:18px;font-weight:900;color:var(--navy)">${r.pct.toFixed(2)}%</span></div>`;
+    html += `<div style="background:#f8fafc;border-radius:8px;padding:10px 12px"><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Acumulado</span><br><span style="font-size:18px;font-weight:900;color:var(--orange)">${r.cumulPct.toFixed(1)}%</span></div>`;
+    html += `<div style="background:#f8fafc;border-radius:8px;padding:10px 12px"><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Unidades</span><br><span style="font-size:16px;font-weight:900;color:var(--navy)">${fmt(r.cantidad)}</span></div>`;
+    html += `<div style="background:#f8fafc;border-radius:8px;padding:10px 12px"><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Venta</span><br><span style="font-size:15px;font-weight:900;color:var(--navy)">${fmtP(r.monto)}</span></div>`;
+    html += `<div style="background:#f8fafc;border-radius:8px;padding:10px 12px;grid-column:1/-1"><span style="color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Proveedor principal</span><br><span style="font-size:13px;font-weight:800;color:var(--navy)">${r.provPrincipal || '—'}</span></div>`;
+    html += `</div>`;
+    html += `<div style="margin-top:10px;text-align:right"><span style="font-size:10px;color:var(--muted);cursor:pointer" onclick="document.getElementById('abc-detail-panel').style.display='none'">✕ Cerrar</span></div>`;
+    abcPanel.innerHTML = html;
+    abcPanel.style.display = 'block';
+  }
+
   charts['ch-abc'] = new Chart(ctx, {
     type: 'bar',
     data: {
@@ -2097,8 +2204,10 @@ function renderResumenABC(abcData) {
           type: 'bar',
           label: 'Participación %',
           data: disp.map(r => r.pct),
-          backgroundColor: barColors,
-          borderRadius: 2,
+          backgroundColor: baseColors.slice(),
+          borderRadius: 4,
+          categoryPercentage: 0.85,
+          barPercentage: 0.95,
           yAxisID: 'y',
           order: 2
         },
@@ -2159,6 +2268,24 @@ function renderResumenABC(abcData) {
       scales: {
         x: { ticks: { font: { size: 10 }, maxRotation: 0 }, title: { display: true, text: 'Artículo (ranking por venta)', font: { size: 10 } } },
         y: { min: 0, max: 100, ticks: { font: { size: 10 }, callback: v => v + '%' } }
+      },
+      onClick: (evt, elements) => {
+        const barEls = elements.filter(e => e.datasetIndex === 0);
+        if (!barEls.length) { closeAbcPanel(); return; }
+        const idx = barEls[0].index;
+        if (activeAbcIdx === idx) {
+          closeAbcPanel();
+        } else {
+          activeAbcIdx = idx;
+          showAbcPanel(idx);
+          const newColors = baseColors.map((c, i) => i === idx ? '#e85d04' : hexToRgba(c, 0.35));
+          charts['ch-abc'].data.datasets[0].backgroundColor = newColors;
+          charts['ch-abc'].update();
+        }
+      },
+      onHover: (evt, elements) => {
+        const barEls = elements.filter(e => e.datasetIndex === 0);
+        evt.native.target.style.cursor = barEls.length ? 'pointer' : 'default';
       }
     }
   });
