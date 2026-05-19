@@ -2,7 +2,7 @@
   "name": "Tablero de Pedidos Pampero",
   "short_name": "Pedidos",
   "description": "Tablero de pedidos conectado a Trello - Pampero Córdoba",
-  "start_url": "/dashboard-pedidos_64.html",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#f0eeeb",
   "theme_color": "#2563eb",
