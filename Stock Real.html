@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='54' font-size='56'%3E📦%3C/text%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ctext y='54' font-size='56'%3E📊%3C/text%3E%3C/svg%3E">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#d97706">
   <link rel="manifest" href="manifest-stock-real.json">
@@ -13,7 +13,7 @@
   <meta name="apple-mobile-web-app-title" content="Stock Real">
   <link rel="apple-touch-icon" href="apple-touch-icon-stock.png">
 
-  <title>📦 Stock Real · Pampero Nuñez</title>
+  <title>📊 Stock Real · Pampero Nuñez</title>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -113,6 +113,11 @@
     table { width: 100%; border-collapse: collapse; font-size: .88rem; }
     th { font-family: var(--mono); font-size: .68rem; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); padding: .6rem 1rem; text-align: left; background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
     td { padding: .6rem 1rem; border-bottom: 1px solid var(--surface2); vertical-align: middle; }
+    .table-wrap th:first-child, .table-wrap td:first-child { position: sticky; left: 0; z-index: 2; box-shadow: 2px 0 4px -2px rgba(0,0,0,.15); }
+    .table-wrap th:first-child { z-index: 3; }
+    .table-wrap tbody td:first-child { background: var(--surface); }
+    .table-wrap tr:hover td:first-child { background: #fafaf9; }
+    .table-wrap tbody tr:last-child td:first-child { background: var(--surface2); }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #fafaf9; }
     td small { display: block; font-size: .72rem; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 260px; }
@@ -253,7 +258,7 @@
 <!-- ═══════════════════════════ SETUP ═══════════════════════════ -->
 <div id="setup">
   <div class="setup-card">
-    <h1>📦 Stock Real Pampero Nuñez</h1>
+    <h1>📊 Stock Real Pampero Nuñez</h1>
     <p>Conectá Google Sheets para ver el stock real de Córdoba.</p>
 
     <div class="setup-section">Google Sheets (Stock)</div>
@@ -271,7 +276,7 @@
 <div id="dashboard" style="display:none;flex-direction:column;min-height:100vh">
   <header>
     <div class="header-left">
-      <h1>📦 Stock Real · Pampero Nuñez</h1>
+      <h1>📊 Stock Real · Pampero Nuñez</h1>
     </div>
     <div class="header-right">
       <span class="last-update">Actualizado: <span id="lastUpdate">—</span></span>
@@ -320,6 +325,7 @@
 
   // Stock filters
   let sfSearch = '', sfSelectedArticulos = new Set(), sfProveedor = '', sfColor = '', sfTalle = '';
+  let sfKeepOpenOnBlur = false;
 
   // ═══════════════════════════════════════════════════════════
   // UTILS
@@ -601,28 +607,46 @@
   // GOOGLE SHEETS — PRECIOS (hoja aparte, columna A código / columna F precio)
   // ═══════════════════════════════════════════════════════════
   async function loadPriceData() {
+    // La hoja de precios tiene más de 130.000 filas (varios catálogos combinados).
+    // Pedirlas todas en un solo request (~17MB) tilda navegadores de celular, así que
+    // se piden en bloques chicos y se van acumulando.
+    const PAGE = 15000;
+    const byCodigo = {}, byDesc = {};
+    let totalRows = 0;
     try {
-      const url = `https://docs.google.com/spreadsheets/d/${PRICE_SHEETS_ID}/gviz/tq?gid=${PRICE_SHEETS_GID}&range=A1:F10000&headers=0`;
-      const data = await gvizJsonp(url);
-      const rows = (data.table && data.table.rows) ? data.table.rows : [];
-      const byCodigo = {}, byDesc = {};
-      rows.forEach(row => {
-        const c = row.c || [];
-        const cell = i => (c[i] && c[i].v !== undefined) ? c[i].v : '';
-        const codigo = cleanStockText(cell(0));
-        const desc = cleanStockText(cell(1));
-        if (norm(codigo).includes('articulo') || norm(desc) === 'articulo descripcion') return;
-        if (!codigo && !desc) return;
-        const precio = parseStockNumber(cell(5));
-        if (!precio) return;
-        if (codigo) byCodigo[codigo.toUpperCase()] = precio;
-        if (desc) byDesc[norm(desc)] = precio;
-      });
-      priceData = { byCodigo, byDesc };
+      for (let startRow = 1; startRow <= 200000; startRow += PAGE) {
+        const endRow = startRow + PAGE - 1;
+        const url = `https://docs.google.com/spreadsheets/d/${PRICE_SHEETS_ID}/gviz/tq?gid=${PRICE_SHEETS_GID}&range=A${startRow}:F${endRow}&headers=0`;
+        let data;
+        try {
+          data = await gvizJsonp(url, 20000);
+        } catch (e) {
+          log(`Precios bloque A${startRow}:F${endRow} falló (${e.message})`);
+          break;
+        }
+        const rows = (data.table && data.table.rows) ? data.table.rows : [];
+        rows.forEach(row => {
+          const c = row.c || [];
+          const cell = i => (c[i] && c[i].v !== undefined) ? c[i].v : '';
+          const codigo = cleanStockText(cell(0));
+          const desc = cleanStockText(cell(1));
+          if (norm(codigo).includes('articulo') || norm(desc) === 'articulo descripcion') return;
+          if (!codigo && !desc) return;
+          const precio = parseStockNumber(cell(5));
+          if (!precio) return;
+          if (codigo) byCodigo[codigo.toUpperCase()] = precio;
+          if (desc) byDesc[norm(desc)] = precio;
+        });
+        totalRows += rows.length;
+        log(`Precios bloque A${startRow}:F${endRow} => ${rows.length} filas (acum ${totalRows})`);
+        priceData = { byCodigo, byDesc };
+        if (rows.length < PAGE) break;
+      }
       log(`✓ Precios: ${Object.keys(byCodigo).length} códigos / ${Object.keys(byDesc).length} descripciones cargadas`);
     } catch (e) {
       log(`Precios: falló la carga (${e.message})`);
-      priceData = {};
+    } finally {
+      priceData = { byCodigo, byDesc };
     }
   }
 
@@ -634,13 +658,17 @@
     document.getElementById('stockLoading').style.display = 'block';
     document.getElementById('stockContent').style.display = 'none';
     try {
-      await Promise.all([loadSheetData(), loadPriceData()]);
+      await loadSheetData();
       document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('es-AR');
       renderStock();
     } catch (e) {
       document.getElementById('lastUpdate').textContent = new Date().toLocaleTimeString('es-AR');
       document.getElementById('stockLoading').innerHTML = `<span style="color:var(--danger)">Error stock: ${e.message}</span>`;
+      return;
     }
+    // Los precios se cargan aparte y no bloquean la aparición de los artículos:
+    // en celular la hoja de precios (bloques de a 15.000 filas) puede tardar más.
+    loadPriceData().then(() => renderStock());
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -798,8 +826,9 @@
         <div style="position:relative;flex:1;max-width:320px">
           <input type="text" id="sfTextInput" placeholder="Buscar artículo para agregar…" value="${sfSearch.replace(/"/g,'&quot;')}"
             oninput="sfSearch=this.value;showSfDropdown()"
-            onblur="setTimeout(()=>{const d=document.getElementById('sfDropdown');if(d)d.style.display='none'},150)"
-            onfocus="showSfDropdown()"
+            onkeydown="if(event.key==='Enter'){event.preventDefault();sfKeepOpenOnBlur=true;}"
+            onblur="setTimeout(()=>{if(sfKeepOpenOnBlur){sfKeepOpenOnBlur=false;const i=document.getElementById('sfTextInput');if(i)i.focus();return;}const d=document.getElementById('sfDropdown');if(d)d.style.display='none'},150)"
+            onfocus="sfKeepOpenOnBlur=false;showSfDropdown()"
             style="width:100%;box-sizing:border-box" autofocus>
           <div id="sfDropdown" style="display:none;position:absolute;top:calc(100% + 2px);left:0;right:0;background:var(--surface);border:1px solid var(--border);border-radius:6px;max-height:280px;overflow-y:auto;z-index:9999;box-shadow:0 6px 24px rgba(0,0,0,.22)"></div>
         </div>
