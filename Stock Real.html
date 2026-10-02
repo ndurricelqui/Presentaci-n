@@ -90,6 +90,8 @@
     /* ── Precio destacado ── */
     .precio-tag { font-family: var(--display); font-size: 1rem; font-weight: 800; color: var(--success); background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 8px; padding: .2rem .7rem; line-height: 1.2; white-space: nowrap; }
     .precio-tag-sm { font-family: var(--display); font-weight: 800; color: var(--success); background: #dcfce7; border: 1px solid #bbf7d0; border-radius: 6px; padding: 1px 8px; font-size: .82rem; white-space: nowrap; }
+    .precio-tag-l2 { font-family: var(--display); font-weight: 700; color: var(--accent); background: #dbeafe; border: 1px solid #bfdbfe; border-radius: 6px; padding: 1px 7px; font-size: .68rem; white-space: nowrap; }
+    .precio-tag-l3 { font-family: var(--display); font-weight: 700; color: var(--purple); background: #ede9fe; border: 1px solid #ddd6fe; border-radius: 6px; padding: 1px 7px; font-size: .68rem; white-space: nowrap; }
 
     /* ── Filter bar ── */
     .filter-bar { display: flex; align-items: center; gap: .75rem; padding: .75rem 1.25rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
@@ -310,6 +312,13 @@
   const PRICE_SHEETS_ID = '1fg6sQFMJBnZFgxEu2oFZJnyVgyV9X-gXMj1Bq_g6Fyw';
   const PRICE_SHEETS_GID = '0';
 
+  // Lista 2 (Mayorista)
+  const PRICE2_SHEETS_ID = '16WIuzrqFclQO22YZbPhBY8nNfwpX8Q3wzshX-mTtNNU';
+  const PRICE2_SHEETS_GID = '0';
+  // Lista 3 (Distribuidora)
+  const PRICE3_SHEETS_ID = '1czDxMU8l3Rwht5hQ-MYj-iQ8gJ37AAbEEnQ8zo4uG6s';
+  const PRICE3_SHEETS_GID = '0';
+
   const CATALOG = { "I116": { "desc": "PANTALON CAZADOR CARGO II H. PAMPERO CHICO (36-54)", "proveedores": ["MACATA SA"] }, "111122053": { "desc": "REMERA BASICA JERSEY 24/1 PEINADO LINCOLN", "proveedores": ["Pampenorte S.R.L."] }, "U752": { "desc": "CHALECO SOFTSHELL PAMPERO IND.", "proveedores": ["RANQUEL DEL PLATA SA"] }, "111138100": { "desc": "CHOMBA BASICA PIQUE PAMPERO", "proveedores": ["Pampenorte S.R.L."] }, "111140100": { "desc": "REMERA BASICA JERSEY 24/1 PAMPERO", "proveedores": ["Pampenorte S.R.L."] }, "121134003": { "desc": "BOTINETA PEHUAJO C/ CORDONES", "proveedores": ["RANQUEL DEL PLATA SA"] }, "134171010": { "desc": "GUANTE CUTEX TOUCH ANTI CORTE PU", "proveedores": ["INDUSTRIAL ZONDA SA"] }, "321173003": { "desc": "BOTIN TREKKING CASTOR", "proveedores": ["INTENSIVO SA"] }, "411124020": { "desc": "CAMISA SAN LUIS C.SEMI AB.BOT M/L", "proveedores": ["AZUL PATAGONIA"] }, "411138029": { "desc": "POLO RIO DE LA PLATA", "proveedores": ["C D Way S.A."] }, "811122047": { "desc": "REMERA BASICA M/C ESC RED.", "proveedores": ["C D Way S.A."] }, "I011": { "desc": "TRAJE DE LLUVIA PVC PAMPERO", "proveedores": ["SAFETY SOLUTION SA"] }, "I036": { "desc": "PANTALON DE TRABAJO HOMBRE PAMPERO CH(36-60)", "proveedores": ["MACATA SA"] }, "I075": { "desc": "GUANTE DESCARNE SOLDADOR", "proveedores": ["CANOR - NOGUERA CARLOS JAVIER"] }, "I102": { "desc": "BOMBACHA LISA HOMBRE PAMPERO (38-54)", "proveedores": ["MACATA SA"] }, "I257": { "desc": "PONCHO RESERO ROYAL PAMPERO PVC", "proveedores": ["SAFETY SOLUTION SA"] }, "IC012": { "desc": "CAMISA DE TRABAJO H. M/L PAMPERO CH (36-48)", "proveedores": ["MACATA SA"] }, "IC015": { "desc": "CAMISA DE TRAB H.M/L PAMPERO AZUL CH(38-48)", "proveedores": ["MACATA SA"] }, "U013": { "desc": "ALPARGATA INYECTADA SIMIL YUTE PAMPERO", "proveedores": ["MP NEGOCIOS ARGENTINA SA"] }, "U029": { "desc": "PANTALON CARGO BAGUALES PAMPERO", "proveedores": ["CITEX SRL"] }, "U082": { "desc": "CINTO SAUCE COMB. 40 SOGA PAMPERO", "proveedores": ["Pionera S.A."] }, "U12106004": { "desc": "PANTALON CAIRO PAMPERO", "proveedores": ["MACATA SA"] }, "U178": { "desc": "PANTALON JUNIN CHUPIN", "proveedores": ["RIEMERSO SA"] }, "U412": { "desc": "PANTALON CARGO DEL NORTE H.", "proveedores": ["CITEX SRL"] }, "123410131": { "desc": "BOTIN PATRIO C/FLOR C/P PAMPERO", "proveedores": ["RANQUEL DEL PLATA SA"] }, "13106003": { "desc": "ROMPEVIENTO PAMPERO", "proveedores": ["La Pettit S.A."] }, "136121501": { "desc": "TRAJE DE LLUVIA STORM PAMPERO", "proveedores": ["SAFETY SOLUTION SA"] }, "224122000": { "desc": "PANCHA RANCHO", "proveedores": ["CITEX SRL"] }, "241122007": { "desc": "BOINA VASCA ALGODON 35CM", "proveedores": ["Corbellini Pablo Andres"] }, "244122009": { "desc": "FAJA GUARDA PAMPA 9CM PAMPERO", "proveedores": ["Corbellini Pablo Andres"] }, "245122001": { "desc": "RUANA PESADA C/GUARDA", "proveedores": ["Corbellini Pablo Andres"] }, "3001": { "desc": "CHAPA Nº0 16X21", "proveedores": ["Recalde Gaston Alberto"] }, "311106107": { "desc": "CAMISA PUAN M/CORTA 2 BOLSILLOS", "proveedores": ["Armesto Maria Eugenia"] }, "311106108": { "desc": "CAMISA PUAN PAPPER M/L", "proveedores": ["Armesto Maria Eugenia"] }, "312106024": { "desc": "PANTALON EPEUCEN SOFTSHELL SOLAR PRO H.", "proveedores": ["Armesto Maria Eugenia"] }, "312157000": { "desc": "PANTALON HUEMUL", "proveedores": ["Lopez Omar Alexis"] }, "313106019": { "desc": "CHALECO DORADO SOFSHELL", "proveedores": ["Lopez Omar Alexis"] }, "313106202": { "desc": "CAMPERA PACU", "proveedores": ["Lopez Omar Alexis"] }, "313211142": { "desc": "CAMPERA CURRUHUE H. SOFTSELL", "proveedores": ["Armesto Maria Eugenia"] }, "342106000": { "desc": "CUELLO MULTIFUNCION", "proveedores": ["Lopez Omar Alexis"] }, "411103006": { "desc": "CAMISA OXFORD HOMBRE BARRACAS", "proveedores": ["CITEX SRL"] }, "411106108": { "desc": "CAMISA ACTIVIDAD", "proveedores": ["BREA MARIA PAULA"] }, "411122019": { "desc": "CAMISA CEFERINO POPLIN C. ITAL", "proveedores": ["AZUL PATAGONIA"] }, "411122024": { "desc": "SWEATER SAN CARLOS", "proveedores": ["FOOTWEAR S.R.L"] }, "411122059": { "desc": "CAMPERA SAN CARLOS", "proveedores": ["FOOTWEAR S.R.L"] }, "411122214": { "desc": "SWEATER PINO", "proveedores": ["J.S. Purpura S.R.L."] }, "411122231": { "desc": "SWEATER MORRIS ESCOTE V", "proveedores": ["J.S. Purpura S.R.L."] }, "411122240": { "desc": "CHALECO LENGA", "proveedores": ["J.S. Purpura S.R.L."] }, "411122244": { "desc": "CAMISA MONTE", "proveedores": ["CITEX SRL"] }, "411124001": { "desc": "CAMISA SOLER C/INGLES ML C/B POPLIN", "proveedores": ["AZUL PATAGONIA"] }, "411138008": { "desc": "POLO BASICA PIQUE", "proveedores": ["C D Way S.A."] }, "411139007": { "desc": "CAMPERA CORMORANES", "proveedores": ["C D Way S.A."] }, "411140004": { "desc": "REMERA BASICA PREMIUM 30/1 PAMPERO", "proveedores": ["C D Way S.A."] }, "411140205": { "desc": "REMERA MOLINOS", "proveedores": ["C D Way S.A."] }, "411140216": { "desc": "REMERA COLOME", "proveedores": ["C D Way S.A."] }, "411140218": { "desc": "POLO VOLCAN DOMUYO", "proveedores": ["C D Way S.A."] }, "411514109": { "desc": "CAMISA FRENCH FANTASIA", "proveedores": ["CITEX SRL"] }, "411520002": { "desc": "CAMPERA ITAMBAE", "proveedores": ["J.S. Purpura S.R.L."] }, "411520003": { "desc": "SWEATER AYACUCHO", "proveedores": ["J.S. Purpura S.R.L."] }, "411527012": { "desc": "CAMISA SOLER CUELLO INGLES OXFORD RAYADO", "proveedores": ["AZUL PATAGONIA"] }, "411540007": { "desc": "SWEATER ROBLE", "proveedores": ["J.S. Purpura S.R.L."] }, "412101002": { "desc": "PANTALON CARGO DEL NORTE HOMBRE", "proveedores": ["CITEX SRL"] }, "412106029": { "desc": "PANTALON VIAJERO SECADO RAPIDO", "proveedores": ["BREA MARIA PAULA"] }, "412106032": { "desc": "PANTALON DESMONTABLE", "proveedores": ["BREA MARIA PAULA"] }, "412124001": { "desc": "BERMUDA ROMERILLO PINZADA POPLIN", "proveedores": ["RIEMERSO SA"] }, "412500058": { "desc": "PANTALON ORIGEN DENIM", "proveedores": ["RIEMERSO SA"] }, "412545002": { "desc": "PANTALON FELIPE DENIM", "proveedores": ["RIEMERSO SA"] }, "413101031": { "desc": "CAMPERA RUSTICA", "proveedores": ["Lopez Omar Alexis"] }, "444134005": { "desc": "CINTO HEBILLA FORRADA 35MM", "proveedores": ["Pionera S.A."] }, "444134011": { "desc": "CINTO ALAMO 40MM", "proveedores": ["Pionera S.A."] }, "511138100": { "desc": "CHOMBA DAMA BASICA PIQUE PAMPERO", "proveedores": ["Pampenorte S.R.L."] }, "712106008": { "desc": "BABUCHA ROSAS SOFT SHELL DAMA", "proveedores": ["Armesto Maria Eugenia"] }, "7798331470540": { "desc": "BOLSO DUOMO BAG 19 LTS GR", "proveedores": ["ARTICULOS PROMOCIONALES SA"] }, "7798385662892": { "desc": "MOCHILA TRAFUL", "proveedores": ["ARTICULOS PROMOCIONALES SA"] }, "7798385666784": { "desc": "BOTELLA HYDRA GO 750ML", "proveedores": ["ARTICULOS PROMOCIONALES SA"] }, "7799176003306": { "desc": "BOLSO REMANSO", "proveedores": ["ARTICULOS PROMOCIONALES SA"] }, "811122092": { "desc": "REMERA PETUNIA", "proveedores": ["C D Way S.A."] }, "811122112": { "desc": "CAMISA JAUREGUI POPLIN", "proveedores": ["TORRES RODRIGO SEBASTIAN"] }, "811122263": { "desc": "CAMISA RAUCH BRODERY", "proveedores": ["AZUL PATAGONIA"] }, "811122315": { "desc": "CAMISA LUZ", "proveedores": ["AZUL PATAGONIA"] }, "811124004": { "desc": "CAMISA MAIZANI M/L POPLIN Y FIBRANA", "proveedores": ["AZUL PATAGONIA"] }, "811124033": { "desc": "CAMISA CLARA POPLIN RAYAS", "proveedores": ["TORRES RODRIGO SEBASTIAN"] }, "811138001": { "desc": "POLO TREBOL BLANCO", "proveedores": ["C D Way S.A."] }, "811140064": { "desc": "REMERA ALGODONILLO", "proveedores": ["C D Way S.A."] }, "811140065": { "desc": "REMERA PUERTO PIRAMIDES", "proveedores": ["C D Way S.A."] }, "811168026": { "desc": "REMERA CATEDRAL", "proveedores": ["C D Way S.A."] }, "811500000": { "desc": "CAMISA MAIZANI DENIM M/L", "proveedores": ["TORRES RODRIGO SEBASTIAN"] }, "811505001": { "desc": "CAMISA BASICA MAIZANI POPLIN LISO", "proveedores": ["AZUL PATAGONIA"] }, "811508009": { "desc": "POLO TREBOL ROJO", "proveedores": ["C D Way S.A."] }, "811527004": { "desc": "CAMISA BASICA 70/30 MAIZANI OXFORD RAYADO", "proveedores": ["AZUL PATAGONIA"] }, "811533007": { "desc": "CAMISA BASICA MAIZANI POPLIN RAYADO", "proveedores": ["AZUL PATAGONIA"] }, "812122225": { "desc": "BOMBACHA MARTINA", "proveedores": ["RIEMERSO SA"] }, "812506036": { "desc": "PANTALON CUMBRES DENIM", "proveedores": ["RIEMERSO SA"] }, "842135004": { "desc": "PASCHMINA A CUADROS", "proveedores": ["J.S. Purpura S.R.L."] }, "844134010": { "desc": "CINTO 15MM", "proveedores": ["Pionera S.A."] }, "844134013": { "desc": "CINTO CANELO FLOTER 30MM", "proveedores": ["Pionera S.A."] }, "844134015": { "desc": "CINTO JAZMIN 30MM", "proveedores": ["Pionera S.A."] }, "882106012": { "desc": "MOCHILA PEHUEN CO", "proveedores": ["Pionera S.A."] }, "882106013": { "desc": "BOLSO PEHUEN CO", "proveedores": ["Pionera S.A."] }, "944122002": { "desc": "FAJA GUARDA PAMPA NIÑO", "proveedores": ["Corbellini Pablo Andres"] }, "A004": { "desc": "PANTALON BAHIA CLASICO 5 BOLS. H. PAMPERO", "proveedores": ["RIEMERSO SA"] }, "A200": { "desc": "PANTALON ARECO GABARDINA C/LYCRA", "proveedores": ["RIEMERSO SA"] }, "I004": { "desc": "CHALECO BASICO H. POLAR C/BOLS. PAMPERO", "proveedores": ["RANQUEL DEL PLATA SA"] }, "I005": { "desc": "CAMPERA BASICA H.POLAR C/BOLS. PAMPERO", "proveedores": ["RANQUEL DEL PLATA SA"] }, "I007": { "desc": "CHALECO BASICO TERMICO TRK PAMPERO", "proveedores": ["RANQUEL DEL PLATA SA"] }, "I013": { "desc": "TRAJE DE LLUVIA BIL VEX", "proveedores": ["BAC-DALL ARGENTINA SA"] }, "I026": { "desc": "MAMELUCO MANGA RANGLAN H. PAMPERO AZUL (50-60)", "proveedores": ["MACATA SA"] }, "I042": { "desc": "CAMPERA ANORAK TERMICA TRUCKER PAMPERO", "proveedores": ["RANQUEL DEL PLATA SA"] }, "I043": { "desc": "CAMPERA PARKA BIL VEX", "proveedores": ["BAC-DALL ARGENTINA SA"] }, "I044": { "desc": "CAMPERA DRIVER BIL VEX PREMIUM CORTA", "proveedores": ["BAC-DALL ARGENTINA SA"] }, "I051": { "desc": "BOTA PETROLERA CLASICA PAMPERO", "proveedores": ["RANQUEL DEL PLATA SA"] }, "I060": { "desc": "BOTA PAMPERO JOB MASTER C.LARGA", "proveedores": ["INTENSIVO SA"] }, "I062": { "desc": "BOTA PAMPERO JOB MASTER CON PUNTERA", "proveedores": ["INTENSIVO SA"] }, "I065": { "desc": "BOTA NAUTICA C/CUELLO PVC C.LARGA PAMPERO", "proveedores": ["INTENSIVO SA"] }, "I115": { "desc": "PANTALON CAZADOR CARGO II H. PAMPERO GRANDE (56-70)", "proveedores": ["MACATA SA"] }, "I119": { "desc": "BERMUDA CARGO H. PAMPERO", "proveedores": ["MACATA SA"] }, "I125": { "desc": "CAMISA DENIM FAC TOWN", "proveedores": ["FAC TOWN"] }, "I207": { "desc": "BOTIN PA-709 C/BOX PU BIDENSIDAD", "proveedores": ["DENEB SA"] }, "I213": { "desc": "BOTIN 1709 C/FLOR PU BIDENSIDAD", "proveedores": ["DENEB SA"] }, "I272": { "desc": "BOTIN FUNDIDOR ELAS. 2519 S/PUNTA", "proveedores": ["DENEB SA"] }, "I307": { "desc": "ZAPATILLA P1269 C/PUNTA", "proveedores": ["DENEB SA"] }, "I312": { "desc": "ZAPATO 1609 C/FLOR C/PUNTA", "proveedores": ["DENEB SA"] }, "I322": { "desc": "BOTIN ALENKE (2799) PAMPERO C/P", "proveedores": ["DENEB SA"] }, "I326": { "desc": "CAMPERA DESCARNE SOLDADOR (S-3XL)", "proveedores": ["CANOR - NOGUERA CARLOS JAVIER"] }, "I345": { "desc": "BOTA JOB MASTER PVC PAMPERO BLANCA", "proveedores": ["INTENSIVO SA"] }, "I350": { "desc": "BOMBACHA LISA HOMBRE PAMPERO (56-60)", "proveedores": ["MACATA SA"] }, "I352": { "desc": "BOMBACHA LISA H.PAMPERO AZUL (56-60)", "proveedores": ["MACATA SA"] }, "I368": { "desc": "BALIZA INTERMITENTE P/CONO GRANDE", "proveedores": ["SIN MARCA"] }, "I380": { "desc": "ZAP. P35 C/FLOR S/PUNTA", "proveedores": ["TKW S.A."] }, "I401": { "desc": "TRAJE PREMIUM MOTO STYLE PAMPERO", "proveedores": ["SAFETY SOLUTION SA"] }, "I461": { "desc": "BOTIN 1709 BLANCO C/FLOR C/PUNTA", "proveedores": ["DENEB SA"] }, "I462": { "desc": "BOTIN BIDENSIDAD C/P P 901 DN PAMPERO", "proveedores": ["TKW S.A."] }, "I479": { "desc": "PANTALON JEAN INDUS. WORKER", "proveedores": ["MACATA SA"] }, "I545": { "desc": "BOTIN PAMPERO MARRON C/P P41FM", "proveedores": ["TKW S.A."] }, "I546": { "desc": "BOTIN PAMPERO MARRON SIN PUNTERA P40FM", "proveedores": ["TKW S.A."] }, "I548": { "desc": "BOTIN PAMPERO CUEROBOX C/P P91 BIDENSIDAD", "proveedores": ["TKW S.A."] }, "I564": { "desc": "BOTIN P61 CUERO FLOR BIDENSIDAD C/PUNTA", "proveedores": ["TKW S.A."] }, "I591": { "desc": "PANT. PAMPERO INDUS. H. JEAN (52-60)", "proveedores": ["MACATA SA"] }, "I624": { "desc": "TRAJE DE LLUVIA SLAPPA", "proveedores": ["RINOTEC SRL"] }, "I739": { "desc": "TRAJE DE LLUVIA PREMIUM BIL-VEX", "proveedores": ["BAC-DALL ARGENTINA SA"] }, "I91BR": { "desc": "BOTIN PAMPERO BIDENS. BR 9001-3001", "proveedores": ["TKW S.A."] }, "IC013": { "desc": "CAMISA DE TRABAJO H.M/L PAMPERO MED.(50-56)", "proveedores": ["MACATA SA"] }, "IC014": { "desc": "CAMISA DE TRABAJO H.M/L PAMPERO GRANDE(58-70)", "proveedores": ["MACATA SA"] }, "IC016": { "desc": "CAMISA DE TRAB H.M/L PAMPERO AZUL M(50-56)", "proveedores": ["MACATA SA"] }, "IC017": { "desc": "CAMISA DE TRAB H.M/L PAMPERO AZUL G(58-70)", "proveedores": ["MACATA SA"] }, "IR123": { "desc": "PONCHO RESERO ECONOMICO", "proveedores": ["SIN MARCA"] }, "N019": { "desc": "BOMBACHA LISA NIÑO PAMPERO", "proveedores": ["MACATA SA"] }, "PA3010": { "desc": "ZAPATILLA 3010 PAMPERO TREKKING", "proveedores": ["DENEB SA"] }, "RI249": { "desc": "BOXER PAMPERO", "proveedores": ["C D Way S.A."] }, "U007": { "desc": "CAMISA ESTANCIERA Hombre. M/L PAMPERO", "proveedores": ["CITEX SRL"] }, "U011": { "desc": "ALPARGATA REFORZADA ADULTO PAMPERO", "proveedores": ["CITEX SRL"] }, "U030": { "desc": "BERMUDA CONDORES PAMPERO", "proveedores": ["CITEX SRL"] }, "U034": { "desc": "PANTALON CARGO RIPSTOP CH (38-54) PAMPERO", "proveedores": ["MACATA SA"] }, "U056": { "desc": "PANT. PAMPERO INDUS. H. JEAN (38-50)", "proveedores": ["MACATA SA"] }, "U063": { "desc": "PANTALON BAHIA POPLIN C/LYCRA PAMPERO", "proveedores": ["RIEMERSO SA"] }, "U070": { "desc": "CHALECO TRELEW H. MATELASEE PAMPERO", "proveedores": ["FOOTWEAR S.R.L"] }, "U084": { "desc": "CINTO COIHUE LISO 40 ENGRASADO PAMPERO", "proveedores": ["Pionera S.A."] }, "U088": { "desc": "CINTO TAPIAL H. 40 CUERO PAMPERO", "proveedores": ["Pionera S.A."] }, "U089": { "desc": "CINTO CAVEN SUELA 40 MM PAMPERO", "proveedores": ["Pionera S.A."] }, "U091": { "desc": "BILLETERA ALERCE H. COMB. LONA PAMPERO", "proveedores": ["Pionera S.A."] }, "U102": { "desc": "BOMBACHA LISA MUJER PAMPERO", "proveedores": ["MACATA SA"] }, "U11122003": { "desc": "CAMISA CAMPO", "proveedores": ["Lopez Omar Alexis"] }, "U11157000": { "desc": "CAMISA RIPSTOP", "proveedores": ["Lopez Omar Alexis"] }, "U122": { "desc": "PANTALON BARRACAS CLASICO M. PAMPERO", "proveedores": ["RIEMERSO SA"] }, "U123": { "desc": "PANT. CANDELARIA M. C/LYCRA PAMPERO", "proveedores": ["RIEMERSO SA"] }, "U145": { "desc": "PANTALON CARGO ELASTIZADO PAMPERO FIT", "proveedores": ["MACATA SA"] }, "U159": { "desc": "CHALECO PEHUEN PAMPERO", "proveedores": ["RANQUEL DEL PLATA SA"] }, "U176": { "desc": "BOMBACHA OLIVERA H. POPLIN", "proveedores": ["RIEMERSO SA"] }, "U2000": { "desc": "BOTIN TREKKING LANIN", "proveedores": ["INTENSIVO SA"] }, "U2001": { "desc": "BOTIN TREKKIN TRONADOR", "proveedores": ["INTENSIVO SA"] }, "U2003": { "desc": "ZAPATILLA TREKKING OTTO", "proveedores": ["INTENSIVO SA"] }, "U209": { "desc": "PANTALON CARGO RIPSTOP GR (56-60) PAMPERO", "proveedores": ["MACATA SA"] }, "U237": { "desc": "CINTO YATAY BORD. ROMBO 25 PAMPERO", "proveedores": ["Pionera S.A."] }, "U24001D": { "desc": "CAMISA MAIZANI LISO", "proveedores": ["AZUL PATAGONIA"] }, "U325": { "desc": "TERMERA CUERO OLMOS", "proveedores": ["Pionera S.A."] }, "U371": { "desc": "BOTIN RURAL ARRIERO", "proveedores": ["TKW S.A."] }, "U372": { "desc": "BOTIN RURAL RODEO", "proveedores": ["TKW S.A."] }, "U392": { "desc": "CINTO LARREA BORDADO 35MM", "proveedores": ["Pionera S.A."] }, "U396": { "desc": "NECESSAIRE PICABUEY LONA CHICO", "proveedores": ["Pionera S.A."] }, "U411": { "desc": "PANTALON DAMA CARGO DEL NORTE", "proveedores": ["CITEX SRL"] }, "U41160000": { "desc": "AUSTRALIANO CLASICO", "proveedores": ["Mel Sombreros S.R.L."] }, "U41160001": { "desc": "AUSTRALIANO CAZA Y PESCA", "proveedores": ["Mel Sombreros S.R.L."] }, "U41171004": { "desc": "AUSTRALIANO PALMA VERDE", "proveedores": ["Mel Sombreros S.R.L."] }, "U415": { "desc": "ALPARGATA YUTE REFORZADA", "proveedores": ["CITEX SRL"] }, "U433": { "desc": "NECESSAIRE PICABUEY LONA GRANDE", "proveedores": ["PAMPERO"] }, "U454": { "desc": "BOMBACHA ALUMINE M.POPLIN PAMP.", "proveedores": ["RIEMERSO SA"] }, "U596": { "desc": "CAMISA CAIRO FAST DRY", "proveedores": ["MACATA SA"] }, "U601": { "desc": "CHALECO CANVAS", "proveedores": ["MACATA SA"] }, "U616": { "desc": "FAJA TRINCADA 9CM", "proveedores": ["Corbellini Pablo Andres"] }, "U751": { "desc": "CAMPERA SOFTSHELL PAMPERO IND.", "proveedores": ["RANQUEL DEL PLATA SA"] }, "U82106000": { "desc": "MOCHILA EZEIZA", "proveedores": ["Pionera S.A."] }, "U82106001": { "desc": "MOCHILA MAR DEL PLATA", "proveedores": ["Pionera S.A."] }, "I010": { "desc": "BUZO BASICO H.FRIZA PAMPERO", "proveedores": ["GUADAL RM SRL"] }, "I012": { "desc": "CAPA DE LLUVIA BIL VEX", "proveedores": ["BAC-DALL ARGENTINA SA"] }, "I029": { "desc": "PANTALON TRUCKER TERMICO PAMPERO", "proveedores": ["RANQUEL DEL PLATA SA"] }, "I099": { "desc": "BOMBACHA URION H.LIVIANA PAMPERO", "proveedores": ["MACATA SA"] }, "I117": { "desc": "PANTALON CAZ. CARGO II H. PAMPERO AZUL CH (36-54)", "proveedores": ["MACATA SA"] }, "I118": { "desc": "PANTALON CAZ. CARGO II H. PAMPER AZUL GD (56-70)", "proveedores": ["MACATA SA"] }, "I218": { "desc": "PANTALON CARGO DAMA PAMPERO", "proveedores": ["MACATA SA"] }, "I351": { "desc": "BOMBACHA LISA H. PAMPERO AZUL (38-54)", "proveedores": ["MACATA SA"] }, "I382": { "desc": "JEAN DAMA IND. ELASTIZADO PAMPERO", "proveedores": ["MACATA SA"] }, "I503": { "desc": "CHALECO MINERO REFLECTIVO PAMPERO", "proveedores": ["MACATA SA"] }, "I508": { "desc": "BERMUDA RIPSTOP PAMPERO CH. (38-54)", "proveedores": ["MACATA SA"] }, "I585": { "desc": "CAMISA DE TRAB. H M/L JEAN PAMPERO (50-60)", "proveedores": ["MACATA SA"] }, "I606": { "desc": "BOTIN P401 BOX C/PUNTA PU AMARILLA", "proveedores": ["DENEB SA"] }, "U036": { "desc": "CAMISA OXFORD H. M/L PLUSNORTE", "proveedores": ["Pampenorte S.R.L."] }, "U100": { "desc": "CAMISA ESTANCIERA Mujer M/L PAMPERO", "proveedores": ["CITEX SRL"] }, "U150": { "desc": "TERMO IGUAZU 1.1 LIT. PAMPERO", "proveedores": ["ARTICULOS PROMOCIONALES SA"] }, "HC211024": { "desc": "CHALECO TRIP", "proveedores": ["MACATA SA"] }, "121134004": { "desc": "BOTIN HUEPIL 2701 PAMPERO CUERO FLOR C/P BIDENSIDAD", "proveedores": ["DENEB SA"] }, "I052": { "desc": "ZAPATO CONSTRUCTOR C/P PU PAMPERO", "proveedores": ["PAMPERO"] }, "I108": { "desc": "GUANTE REFORCER C/KEVLAR", "proveedores": ["PAMPERO"] }, "I560": { "desc": "BOTIN BAQUEANO S/P PAMPERO", "proveedores": ["RANQUEL DEL PLATA SA"] }, "I038": { "desc": "PANTALON DE TRAB. H. PAMPERO AZUL CH(36-60)", "proveedores": ["MACATA SA"] } };
 
   const ALL_PROVEEDORES = ["ARTICULOS PROMOCIONALES SA","AZUL PATAGONIA","Armesto Maria Eugenia","BAC-DALL ARGENTINA SA","BREA MARIA PAULA","C D Way S.A.","CANOR - NOGUERA CARLOS JAVIER","CITEX SRL","Corbellini Pablo Andres","Coverline SRL","DENEB SA","ELIHO TEXTIL S.R.L","FAC TOWN","FOOTWEAR S.R.L","GAMISOL Y CIA SA","GUADAL RM SRL","Guffanti Silvia Helena","INDUSTRIAL ZONDA SA","INTENSIVO SA","J.S. Purpura S.R.L.","La Maquinola","La Pettit S.A.","Lopez Omar Alexis","MACATA SA","MP NEGOCIOS ARGENTINA SA","Mel Sombreros S.R.L.","PADREVECCHI EDITH AIDA","PAMPERO","Pampenorte S.R.L.","Pionera S.A.","RANQUEL DEL PLATA SA","RIEMERSO SA","RINOTEC SRL","Recalde Gaston Alberto","SAFETY SOLUTION SA","SIN MARCA","TKW S.A.","TORRES RODRIGO SEBASTIAN","Total Protect S. R. L.","Zeaiter Juan Sarquis"];
@@ -321,6 +330,8 @@
   let STOCK_PUB_ID = '';
   let stockData = [];
   let priceData = { byCodigo: {}, byDesc: {} };
+  let priceData2 = { byCodigo: {}, byDesc: {} };
+  let priceData3 = { byCodigo: {}, byDesc: {} };
   let debugLog = [];
 
   // Stock filters
@@ -353,6 +364,37 @@
 
   function formatPrice(n) {
     return n.toLocaleString('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 });
+  }
+
+  function getPrice2(codigo, desc) {
+    if (codigo) {
+      const p = priceData2.byCodigo[codigo.toUpperCase()];
+      if (p !== undefined) return p;
+    }
+    if (desc) {
+      const p = priceData2.byDesc[norm(desc)];
+      if (p !== undefined) return p;
+    }
+    return null;
+  }
+
+  function getPrice3(codigo, desc) {
+    if (codigo) {
+      const p = priceData3.byCodigo[codigo.toUpperCase()];
+      if (p !== undefined) return p;
+    }
+    if (desc) {
+      const p = priceData3.byDesc[norm(desc)];
+      if (p !== undefined) return p;
+    }
+    return null;
+  }
+
+  // Lista 2 y Lista 3 vienen con IVA incluido: se discrimina dividiendo por 1,21
+  // y redondeando al entero mayor más cercano (Math.ceil), y se muestra "sin IVA + IVA".
+  function formatPriceConIva(n) {
+    const sinIva = Math.ceil(n / 1.21);
+    return `${formatPrice(sinIva)} + IVA`;
   }
 
   function stockBadge(qty) {
@@ -651,6 +693,94 @@
   }
 
   // ═══════════════════════════════════════════════════════════
+  // GOOGLE SHEETS — PRECIOS LISTA 2 (Mayorista) — mismo formato que Lista 1
+  // ═══════════════════════════════════════════════════════════
+  async function loadPriceData2() {
+    const PAGE = 15000;
+    const byCodigo = {}, byDesc = {};
+    let totalRows = 0;
+    try {
+      for (let startRow = 1; startRow <= 200000; startRow += PAGE) {
+        const endRow = startRow + PAGE - 1;
+        const url = `https://docs.google.com/spreadsheets/d/${PRICE2_SHEETS_ID}/gviz/tq?gid=${PRICE2_SHEETS_GID}&range=A${startRow}:F${endRow}&headers=0`;
+        let data;
+        try {
+          data = await gvizJsonp(url, 20000);
+        } catch (e) {
+          log(`Precios L2 bloque A${startRow}:F${endRow} falló (${e.message})`);
+          break;
+        }
+        const rows = (data.table && data.table.rows) ? data.table.rows : [];
+        rows.forEach(row => {
+          const c = row.c || [];
+          const cell = i => (c[i] && c[i].v !== undefined) ? c[i].v : '';
+          const codigo = cleanStockText(cell(0));
+          const desc = cleanStockText(cell(1));
+          if (norm(codigo).includes('articulo') || norm(desc) === 'articulo descripcion') return;
+          if (!codigo && !desc) return;
+          const precio = parseStockNumber(cell(5));
+          if (!precio) return;
+          if (codigo) byCodigo[codigo.toUpperCase()] = precio;
+          if (desc) byDesc[norm(desc)] = precio;
+        });
+        totalRows += rows.length;
+        log(`Precios L2 bloque A${startRow}:F${endRow} => ${rows.length} filas (acum ${totalRows})`);
+        priceData2 = { byCodigo, byDesc };
+        if (rows.length < PAGE) break;
+      }
+      log(`✓ Precios L2: ${Object.keys(byCodigo).length} códigos / ${Object.keys(byDesc).length} descripciones cargadas`);
+    } catch (e) {
+      log(`Precios L2: falló la carga (${e.message})`);
+    } finally {
+      priceData2 = { byCodigo, byDesc };
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // GOOGLE SHEETS — PRECIOS LISTA 3 (Distribuidora) — mismo formato que Lista 1
+  // ═══════════════════════════════════════════════════════════
+  async function loadPriceData3() {
+    const PAGE = 15000;
+    const byCodigo = {}, byDesc = {};
+    let totalRows = 0;
+    try {
+      for (let startRow = 1; startRow <= 200000; startRow += PAGE) {
+        const endRow = startRow + PAGE - 1;
+        const url = `https://docs.google.com/spreadsheets/d/${PRICE3_SHEETS_ID}/gviz/tq?gid=${PRICE3_SHEETS_GID}&range=A${startRow}:F${endRow}&headers=0`;
+        let data;
+        try {
+          data = await gvizJsonp(url, 20000);
+        } catch (e) {
+          log(`Precios L3 bloque A${startRow}:F${endRow} falló (${e.message})`);
+          break;
+        }
+        const rows = (data.table && data.table.rows) ? data.table.rows : [];
+        rows.forEach(row => {
+          const c = row.c || [];
+          const cell = i => (c[i] && c[i].v !== undefined) ? c[i].v : '';
+          const codigo = cleanStockText(cell(0));
+          const desc = cleanStockText(cell(1));
+          if (norm(codigo).includes('articulo') || norm(desc) === 'articulo descripcion') return;
+          if (!codigo && !desc) return;
+          const precio = parseStockNumber(cell(5));
+          if (!precio) return;
+          if (codigo) byCodigo[codigo.toUpperCase()] = precio;
+          if (desc) byDesc[norm(desc)] = precio;
+        });
+        totalRows += rows.length;
+        log(`Precios L3 bloque A${startRow}:F${endRow} => ${rows.length} filas (acum ${totalRows})`);
+        priceData3 = { byCodigo, byDesc };
+        if (rows.length < PAGE) break;
+      }
+      log(`✓ Precios L3: ${Object.keys(byCodigo).length} códigos / ${Object.keys(byDesc).length} descripciones cargadas`);
+    } catch (e) {
+      log(`Precios L3: falló la carga (${e.message})`);
+    } finally {
+      priceData3 = { byCodigo, byDesc };
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════
   // COMBINED LOAD
   // ═══════════════════════════════════════════════════════════
   async function loadData() {
@@ -668,7 +798,7 @@
     }
     // Los precios se cargan aparte y no bloquean la aparición de los artículos:
     // en celular la hoja de precios (bloques de a 15.000 filas) puede tardar más.
-    loadPriceData().then(() => renderStock());
+    Promise.all([loadPriceData(), loadPriceData2(), loadPriceData3()]).then(() => renderStock());
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -699,11 +829,15 @@
       const sel = sfSelectedArticulos.has(a.codigo);
       const esc = a.codigo.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
       const precio = getPrice(a.codigo, a.desc);
+      const precio2 = getPrice2(a.codigo, a.desc);
+      const precio3 = getPrice3(a.codigo, a.desc);
       return `<div class="sf-dd-item${sel ? ' sf-dd-selected' : ''}" onmousedown="toggleArticulo('${esc}')">
         <span class="sf-dd-check">${sel ? '✓' : ''}</span>
         <span style="font-family:var(--mono);font-weight:700;color:var(--accent2);font-size:.85rem">${a.codigo}</span>
         ${a.desc ? `<span style="color:var(--muted);font-size:.8rem;margin-left:.4rem">${a.desc}</span>` : ''}
         ${precio != null && precio > 0 ? `<span class="precio-tag-sm" style="margin-left:auto">${formatPrice(precio)}</span>` : ''}
+        ${precio2 != null && precio2 > 0 ? `<span class="precio-tag-l2">${formatPriceConIva(precio2)}</span>` : ''}
+        ${precio3 != null && precio3 > 0 ? `<span class="precio-tag-l3">${formatPriceConIva(precio3)}</span>` : ''}
       </div>`;
     }).join('');
     dd.style.display = 'block';
@@ -884,8 +1018,12 @@
         const labels = codigos.map(c => {
           const a = all.find(x => x.codigo === c);
           const precio = getPrice(c, a && a.desc);
+          const precio2 = getPrice2(c, a && a.desc);
+          const precio3 = getPrice3(c, a && a.desc);
           const precioTag = precio != null && precio > 0 ? `<span class="precio-tag-sm">${formatPrice(precio)}</span>` : '';
-          return `<span class="mono-val" style="font-size:.9rem;color:var(--accent2)">${c}</span>${a && a.desc ? `<span style="font-size:.8rem;color:var(--muted)">  ${a.desc}</span>` : ''}${precioTag}`;
+          const precioTag2 = precio2 != null && precio2 > 0 ? `<span class="precio-tag-l2">${formatPriceConIva(precio2)}</span>` : '';
+          const precioTag3 = precio3 != null && precio3 > 0 ? `<span class="precio-tag-l3">${formatPriceConIva(precio3)}</span>` : '';
+          return `<span class="mono-val" style="font-size:.9rem;color:var(--accent2)">${c}</span>${a && a.desc ? `<span style="font-size:.8rem;color:var(--muted)">  ${a.desc}</span>` : ''}${precioTag}${precioTag2}${precioTag3}`;
         }).join('<span style="color:var(--muted);margin:0 .3rem">+</span>');
         const titulo = `<div style="display:flex;align-items:center;gap:.3rem;flex-wrap:wrap">${labels}</div>`;
         const subtitulo = `Stock combinado · ${codigos.length} artículos`;
@@ -900,8 +1038,12 @@
         const artList = Object.values(artMap).sort((a, b) => a.codigo.localeCompare(b.codigo));
         contentHTML = artList.map(art => {
           const precio = getPrice(art.codigo, art.desc);
+          const precio2 = getPrice2(art.codigo, art.desc);
+          const precio3 = getPrice3(art.codigo, art.desc);
           const precioTag = precio != null && precio > 0 ? `<span class="precio-tag">${formatPrice(precio)}</span>` : '';
-          const titulo = `<span class="mono-val" style="font-size:1rem;color:var(--accent2)">${art.codigo}</span><span style="font-weight:600;font-size:.9rem">${art.desc}</span>${precioTag}`;
+          const precioTag2 = precio2 != null && precio2 > 0 ? `<span class="precio-tag-l2">${formatPriceConIva(precio2)}</span>` : '';
+          const precioTag3 = precio3 != null && precio3 > 0 ? `<span class="precio-tag-l3">${formatPriceConIva(precio3)}</span>` : '';
+          const titulo = `<span class="mono-val" style="font-size:1rem;color:var(--accent2)">${art.codigo}</span><span style="font-weight:600;font-size:.9rem">${art.desc}</span>${precioTag}${precioTag2}${precioTag3}`;
           const provStr = art.proveedores.length ? art.proveedores.join(', ') : '—';
           return buildStockTable(art.rows, titulo, provStr);
         }).join('');
